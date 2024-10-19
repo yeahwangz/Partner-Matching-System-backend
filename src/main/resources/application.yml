@@ -1,0 +1,28 @@
+server:
+  port: 8090
+spring:
+  profiles:
+    active: dev
+  application:
+    name: yupao-backend
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.geek01.yupaoBackend.constant
+  configuration:
+    map-underscore-to-camel-case: false
+logging:
+  level:
+    com:
+      geek01:
+        yupaoBackend:
+          controller: info
+          service: info
+          mapper: debug
+#mybatis-plus:
+#  configuration:
+#    map-underscore-to-camel-case: false
