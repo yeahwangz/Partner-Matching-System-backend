@@ -23,6 +23,24 @@ logging:
           controller: info
           service: info
           mapper: debug
+knife4j:
+  enable: true
+  openapi:
+    title: "伙伴匹配系统接口文档"
+    description: "伙伴匹配系统接口文档"
+    email: "2878844162@qq.com"
+    concat: 01geek
+    url: "https://github.com/yeahwangz/Partner-Matching-System-backend"
+    version: v1.0
+    license: Apache 2.0
+    license-url: "https://stackoverflow.com/"
+    terms-of-service-url: "https://stackoverflow.com/"
+    group:
+      test1:
+        group-name: 分组名称
+        api-rule: package
+        api-rule-resources:
+          - com.geek01.yupaoBackend.controller
 #mybatis-plus:
 #  configuration:
 #    map-underscore-to-camel-case: false
