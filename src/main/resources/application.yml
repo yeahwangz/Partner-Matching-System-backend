@@ -24,7 +24,7 @@ logging:
           service: info
           mapper: debug
 knife4j:
-  enable: true
+  enable: ${knife4j.enable}
   openapi:
     title: "伙伴匹配系统接口文档"
     description: "伙伴匹配系统接口文档"
