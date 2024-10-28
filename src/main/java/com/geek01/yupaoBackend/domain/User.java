@@ -41,4 +41,6 @@ public class User implements Serializable {
     private Integer userRole;
 
     private String planetCode;
+
+    private String profile;
 }

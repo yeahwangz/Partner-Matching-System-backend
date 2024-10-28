@@ -1,14 +1,15 @@
 package com.geek01.yupaoBackend.service.impl;
 
-import com.geek01.yupaoBackend.constant.Error;
+import com.geek01.yupaoBackend.common.ErrorCode;
 import com.geek01.yupaoBackend.domain.User;
-import com.geek01.yupaoBackend.exception.CommonException;
+import com.geek01.yupaoBackend.exception.ErrorException;
 import com.geek01.yupaoBackend.mapper.UserMapper;
 import com.geek01.yupaoBackend.service.UserService;
+import com.geek01.yupaoBackend.utils.ResultUtils;
+import com.github.xiaoymin.knife4j.core.util.CollectionUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +29,6 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
      */
     @Override
     public List<User> searchUsersByTags(List<String> tagsNameList) {
-        if(CollectionUtils.isEmpty(tagsNameList)){
-            throw new CommonException(Error.PARAMS_ERROR_CODE, Error.PARAMS_ERROR_MESSAGE);
-        }
 
         /*mp用法  QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         for(String tagName : tagsNameList){
@@ -71,6 +69,7 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
         safetyUser.setUserStatus(originUser.getUserStatus());
         safetyUser.setCreateTime(originUser.getCreateTime());
         safetyUser.setTags(originUser.getTags());
+        safetyUser.setProfile(originUser.getProfile());
         return safetyUser;
     }
 }
