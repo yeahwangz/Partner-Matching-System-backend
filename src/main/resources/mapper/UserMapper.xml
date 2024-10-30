@@ -3,7 +3,7 @@
 <mapper namespace="com.geek01.yupaoBackend.mapper.UserMapper">
     <select id="selectUsersByTagsName" parameterType="java.util.List" resultType="com.geek01.yupaoBackend.domain.User">
         select * from user
-        where isDelete=0 and userRole=0
+        where isDelete=0 and userRole=0 and
         <foreach collection="list" item="tag" separator="and">
             tags like concat('%',#{tag},'%')
         </foreach>

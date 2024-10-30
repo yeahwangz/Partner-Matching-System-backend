@@ -1,7 +1,9 @@
 package com.geek01.yupaoBackend.service;
 
+import com.geek01.yupaoBackend.common.BaseResponse;
 import com.geek01.yupaoBackend.domain.User;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface UserService /*extends IService<User>*/ {
@@ -27,4 +29,20 @@ public interface UserService /*extends IService<User>*/ {
      * @return
      */
     Long userRegister(String userAccount, String userPassword, String checkPassword);
+
+    /**
+     * 普通用户登录
+     * @param userAccount
+     * @param userPassword
+     * @param httpServletRequest
+     * @return
+     */
+    User userLogin(String userAccount, String userPassword, HttpServletRequest httpServletRequest);
+
+    /**
+     * 注销当前用户
+     * @param httpServletRequest
+     * @return
+     */
+    Integer userLogout(HttpServletRequest httpServletRequest);
 }

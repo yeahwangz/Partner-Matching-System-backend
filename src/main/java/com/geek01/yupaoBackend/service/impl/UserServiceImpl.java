@@ -11,10 +11,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.geek01.yupaoBackend.constant.UserConstant.USER_LOGIN_INFO;
 
 @Service
 @Slf4j
@@ -113,5 +118,48 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
             throw new ErrorException(ErrorCode.INSERTSQL_ERROR);
         }
         return newUser.getId();
+    }
+
+    /**
+     * 普通用户登录
+     * @param userAccount
+     * @param userPassword
+     * @param httpServletRequest
+     * @return
+     */
+    @Override
+    public User userLogin(String userAccount, String userPassword, HttpServletRequest httpServletRequest) {
+        // 账户不能包含特殊字符
+        String validPattern = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+        Matcher matcher = Pattern.compile(validPattern).matcher(userAccount);
+        if (matcher.find()) {
+            throw new ErrorException(ErrorCode.PARAMS_ERROR);
+        }
+        //根据用户账号名搜索用户
+        User dbUser = userMapper.getUserByUserAccount(userAccount);
+        // 用户不存在
+        if (dbUser == null) {
+            throw new ErrorException(ErrorCode.NO_USEREXIST);
+        }
+        // 加密
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+        // 密码错误
+        if (!encryptPassword.equals(dbUser.getUserPassword())) {
+            throw new ErrorException(ErrorCode.LOGIN_PASSWORD_ERROR);
+        }
+        User returnUser = getSafetyUser(dbUser);
+        httpServletRequest.getSession().setAttribute(USER_LOGIN_INFO, returnUser);
+        return returnUser;
+    }
+
+    /**
+     * 注销当前用户
+     * @param httpServletRequest
+     * @return
+     */
+    @Override
+    public Integer userLogout(HttpServletRequest httpServletRequest) {
+        httpServletRequest.getSession().removeAttribute(USER_LOGIN_INFO);
+        return 1;
     }
 }

@@ -12,6 +12,8 @@ spring:
     url: ${spring.datasource.url}
     username: ${spring.datasource.username}
     password: ${spring.datasource.password}
+  session:
+    timeout: 600000
   redis:
     host: localhost
     port: 6379
