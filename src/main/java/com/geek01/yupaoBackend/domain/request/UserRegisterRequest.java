@@ -6,6 +6,9 @@ import java.io.Serializable;
 
 @Data
 public class UserRegisterRequest implements Serializable {
+    /**
+     * 确保序列化和反序列化过程中类的兼容性
+     */
     private static final long serialVersionUID = 6554865L;
 
     /**

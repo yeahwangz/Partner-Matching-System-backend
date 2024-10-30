@@ -5,14 +5,16 @@ import com.geek01.yupaoBackend.domain.User;
 import com.geek01.yupaoBackend.exception.ErrorException;
 import com.geek01.yupaoBackend.mapper.UserMapper;
 import com.geek01.yupaoBackend.service.UserService;
-import com.geek01.yupaoBackend.utils.ResultUtils;
-import com.github.xiaoymin.knife4j.core.util.CollectionUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.DigestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -20,6 +22,8 @@ import java.util.List;
 public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ implements UserService {
 
     private final UserMapper userMapper;
+
+    private static final String SALT = "01geek";
 
     /**
      * 根据标签搜索用户
@@ -70,5 +74,44 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
         safetyUser.setTags(originUser.getTags());
         safetyUser.setProfile(originUser.getProfile());
         return safetyUser;
+    }
+
+    /**
+     * 注册普通用户，获取普通用户id
+     * @param userAccount
+     * @param userPassword
+     * @param checkPassword
+     * @return
+     */
+    @Transactional
+    @Override
+    public Long userRegister(String userAccount, String userPassword, String checkPassword) {
+        // 账户不能包含特殊字符
+        String validPattern = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+        Matcher matcher = Pattern.compile(validPattern).matcher(userAccount);
+        if (matcher.find()) {
+            return -1L;
+        }
+        // 密码和校验密码相同
+        if (!userPassword.equals(checkPassword)) {
+            return -1L;
+        }
+        // 确认普通用户名并没有被使用过
+        User user = userMapper.getUserByUserAccount(userAccount);
+        if (user != null) {
+            return -1L;
+        }
+        User newUser = new User();
+        newUser.setUserAccount(userAccount);
+        // 2. 加密
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+        newUser.setUserPassword(encryptPassword);
+        try {
+            userMapper.addNewUserAndReturnUserId(newUser);
+        }catch (Exception e){
+            log.error("新增普通用户失败",e);
+            throw new ErrorException(ErrorCode.INSERTSQL_ERROR);
+        }
+        return newUser.getId();
     }
 }

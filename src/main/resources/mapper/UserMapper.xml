@@ -3,12 +3,21 @@
 <mapper namespace="com.geek01.yupaoBackend.mapper.UserMapper">
     <select id="selectUsersByTagsName" parameterType="java.util.List" resultType="com.geek01.yupaoBackend.domain.User">
         select * from user
-        where isDelete=0 and
+        where isDelete=0 and userRole=0
         <foreach collection="list" item="tag" separator="and">
             tags like concat('%',#{tag},'%')
         </foreach>
     </select>
 
+    <select id="getUserByUserAccount" parameterType="String" resultType="com.geek01.yupaoBackend.domain.User">
+        select * from user
+        where userRole=0 and userAccount=#{userAccount}
+    </select>
+
+    <insert id="addNewUserAndReturnUserId" parameterType="com.geek01.yupaoBackend.domain.User"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into user (userAccount,userPassword) values (#{userAccount},#{userPassword})
+    </insert>
 
     <!--mp-->
     <!--<resultMap id="BaseResultMap" type="com.geek01.yupaoBackend.domain.User">
