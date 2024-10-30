@@ -12,6 +12,10 @@ spring:
     url: ${spring.datasource.url}
     username: ${spring.datasource.username}
     password: ${spring.datasource.password}
+  redis:
+    url: localhost
+    port: 6379
+    database: 0
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.geek01.yupaoBackend.constant

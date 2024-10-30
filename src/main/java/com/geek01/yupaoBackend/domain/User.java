@@ -9,7 +9,7 @@ import java.util.Date;
 /*@TableName(value = "user")*/
 public class User implements Serializable {
     /*@TableField(exist = false)*/
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 984887L;
 
     private String userName;
 
@@ -39,8 +39,6 @@ public class User implements Serializable {
     private Integer isDelete;
 
     private Integer userRole;
-
-    private String planetCode;
 
     private String profile;
 }

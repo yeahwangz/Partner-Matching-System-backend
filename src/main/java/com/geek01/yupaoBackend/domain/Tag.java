@@ -26,5 +26,5 @@ public class Tag implements Serializable {
     private Integer idDelete;
 
     /*mp @TableField(exist = false)*/
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 459848L;
 }
