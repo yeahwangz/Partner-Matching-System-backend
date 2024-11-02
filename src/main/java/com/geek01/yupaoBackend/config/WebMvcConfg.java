@@ -1,15 +1,22 @@
 package com.geek01.yupaoBackend.config;
 
+import com.geek01.yupaoBackend.interceptor.LoginInterceptor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/**
- * 跨域配置
- */
 @Configuration
+@RequiredArgsConstructor
 public class WebMvcConfg implements WebMvcConfigurer {
 
+    private final LoginInterceptor loginInterceptor;
+
+    /**
+     * 跨域配置
+     * @param registry
+     */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         //设置允许跨域的路径
@@ -23,5 +30,17 @@ public class WebMvcConfg implements WebMvcConfigurer {
                 .allowedMethods("*")
                 //跨域允许时间
                 .maxAge(3600);
+    }
+
+    /**
+     * 设置拦截器规则
+     * @param registry
+     */
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(loginInterceptor)
+                .addPathPatterns("/**")
+                .excludePathPatterns("/user/login")
+                .excludePathPatterns("/user/register");
     }
 }

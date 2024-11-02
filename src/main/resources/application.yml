@@ -12,8 +12,10 @@ spring:
     url: ${spring.datasource.url}
     username: ${spring.datasource.username}
     password: ${spring.datasource.password}
+  #失效时间（min）
   session:
-    timeout: 600000
+    timeout: 60000
+    store-type: redis
   redis:
     host: localhost
     port: 6379
