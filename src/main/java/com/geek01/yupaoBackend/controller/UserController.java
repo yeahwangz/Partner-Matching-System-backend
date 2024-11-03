@@ -95,4 +95,18 @@ public class UserController {
     }
     return ResultUtils.success(userService.searchUsersByTags(tagsList));
     }
+
+    /**
+     * 根据cookie确定用户，并修改相应用户信息
+     * @param request
+     * @param newUserInfo
+     * @return
+     */
+    @PostMapping("/edit/userInfo")
+    @ApiOperation("根据cookie确定用户，并修改相应用户信息")
+    public BaseResponse<User> editUserInfoByCookie(HttpServletRequest request,
+                                                      @RequestBody User newUserInfo) {
+        User returnSafetyUserInfo = userService.editUserInfoByCookie(request,newUserInfo);
+        return ResultUtils.success(returnSafetyUserInfo);
+    }
 }

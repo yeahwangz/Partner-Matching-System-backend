@@ -27,4 +27,10 @@ public interface UserMapper /*mp用法 extends BaseMapper<User>*/ {
      * @param newUser
      */
     void addNewUserAndReturnUserId(User newUser);
+
+    /**
+     * 根据cookie确定用户，并修改相应用户信息
+     * @param newUserInfo
+     */
+    void editUserInfoByCookie(User newUserInfo);
 }

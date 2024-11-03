@@ -14,7 +14,8 @@ public enum ErrorCode {
     LOGIN_PASSWORD_ERROR(40103, "登录密码错误", ""),
     FORBIDDEN(40301, "禁止操作", ""),
     SYSTEM_ERROR(50000, "系统内部异常", ""),
-    INSERTSQL_ERROR(50001,"数据库插入异常","");
+    INSERTSQL_ERROR(50001,"数据库插入异常",""),
+    EDITSQL_ERROR(50002,"数据库修改异常","");
 
     private final int code;
 

@@ -9,7 +9,7 @@
         </foreach>
     </select>
 
-    <select id="getUserByUserAccount" parameterType="String" resultType="com.geek01.yupaoBackend.domain.User">
+    <select id="getUserByUserAccount" parameterType="java.lang.String" resultType="com.geek01.yupaoBackend.domain.User">
         select * from user
         where userRole=0 and userAccount=#{userAccount}
     </select>
@@ -18,6 +18,18 @@
             useGeneratedKeys="true" keyProperty="id">
         insert into user (userAccount,userPassword) values (#{userAccount},#{userPassword})
     </insert>
+
+    <update id="editUserInfoByCookie" parameterType="com.geek01.yupaoBackend.domain.User">
+        update user set 
+                        userName = #{userName},
+                        <if test="avatarUrl != null">avatarUrl=#{avatarUrl},</if>
+                        gender=#{gender},
+                        phone=#{phone},
+                        email=#{email},
+                        tags=#{tags},
+                        profile=#{profile}
+        where id = #{id}
+    </update>
 
     <!--mp-->
     <!--<resultMap id="BaseResultMap" type="com.geek01.yupaoBackend.domain.User">

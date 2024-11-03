@@ -1,6 +1,7 @@
 package com.geek01.yupaoBackend.service.impl;
 
 import com.geek01.yupaoBackend.common.ErrorCode;
+import com.geek01.yupaoBackend.constant.UserConstant;
 import com.geek01.yupaoBackend.domain.User;
 import com.geek01.yupaoBackend.exception.ErrorException;
 import com.geek01.yupaoBackend.mapper.UserMapper;
@@ -161,5 +162,25 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
     public Integer userLogout(HttpServletRequest httpServletRequest) {
         httpServletRequest.getSession().removeAttribute(USER_LOGIN_INFO);
         return 1;
+    }
+
+    /**
+     * 根据cookie确定用户，并修改相应用户信息
+     * @param request
+     * @param newUserInfo
+     * @return
+     */
+    @Transactional
+    @Override
+    public User editUserInfoByCookie(HttpServletRequest request, User newUserInfo) {
+        User oldUserInfo = (User) request.getSession().getAttribute(UserConstant.USER_LOGIN_INFO);
+        Long id = oldUserInfo.getId();
+        //用户id和用户想要修改的id不同，越权
+        if ( newUserInfo.getId() == null || !newUserInfo.getId().equals(id) ){
+            throw new ErrorException(ErrorCode.NO_AUTH);
+        }
+        userMapper.editUserInfoByCookie(newUserInfo);
+        User noSafetyUserInfo = userMapper.getUserByUserAccount(newUserInfo.getUserAccount());
+        return getSafetyUser(noSafetyUserInfo);
     }
 }

@@ -45,4 +45,12 @@ public interface UserService /*extends IService<User>*/ {
      * @return
      */
     Integer userLogout(HttpServletRequest httpServletRequest);
+
+    /**
+     * 根据cookie确定用户，并修改相应用户信息
+     * @param request
+     * @param newUserInfo
+     * @return
+     */
+    User editUserInfoByCookie(HttpServletRequest request, User newUserInfo);
 }
