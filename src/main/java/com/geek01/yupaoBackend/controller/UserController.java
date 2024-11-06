@@ -109,4 +109,16 @@ public class UserController {
         User returnSafetyUserInfo = userService.editUserInfoByCookie(request,newUserInfo);
         return ResultUtils.success(returnSafetyUserInfo);
     }
+
+    /**
+     * 根据cookie获取返回安全用户信息
+     * @param request
+     * @return
+     */
+    @GetMapping("/search/userInfo")
+    @ApiOperation("根据cookie获取返回安全用户信息")
+    public BaseResponse<User> getSaftyUserInfoByCookie(HttpServletRequest request) {
+        User safetyUser = userService.getSaftyUserInfoByCookie(request);
+        return ResultUtils.success(safetyUser);
+    }
 }

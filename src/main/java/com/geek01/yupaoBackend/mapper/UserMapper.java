@@ -33,4 +33,11 @@ public interface UserMapper /*mp用法 extends BaseMapper<User>*/ {
      * @param newUserInfo
      */
     void editUserInfoByCookie(User newUserInfo);
+
+    /**
+     * 根据用户id搜索用户
+     * @param id
+     * @return
+     */
+    User getUserById(Long id);
 }

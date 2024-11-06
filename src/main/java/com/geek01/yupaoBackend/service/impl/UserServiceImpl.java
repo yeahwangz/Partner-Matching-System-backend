@@ -14,6 +14,7 @@ import org.springframework.util.DigestUtils;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.Console;
 import java.util.ArrayList;
 import java.util.List;
@@ -180,7 +181,18 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
             throw new ErrorException(ErrorCode.NO_AUTH);
         }
         userMapper.editUserInfoByCookie(newUserInfo);
-        User noSafetyUserInfo = userMapper.getUserByUserAccount(newUserInfo.getUserAccount());
+        User noSafetyUserInfo = userMapper.getUserById(newUserInfo.getId());
         return getSafetyUser(noSafetyUserInfo);
+    }
+
+    /**
+     * 根据cookie获取返回安全用户信息
+     * @param request
+     * @return
+     */
+    @Override
+    public User getSaftyUserInfoByCookie(HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute(UserConstant.USER_LOGIN_INFO);
+        return getSafetyUser(user);
     }
 }

@@ -53,4 +53,11 @@ public interface UserService /*extends IService<User>*/ {
      * @return
      */
     User editUserInfoByCookie(HttpServletRequest request, User newUserInfo);
+
+    /**
+     * 根据cookie获取返回安全用户信息
+     * @param request
+     * @return
+     */
+    User getSaftyUserInfoByCookie(HttpServletRequest request);
 }

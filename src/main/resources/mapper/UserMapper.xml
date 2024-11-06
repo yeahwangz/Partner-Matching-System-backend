@@ -20,17 +20,23 @@
     </insert>
 
     <update id="editUserInfoByCookie" parameterType="com.geek01.yupaoBackend.domain.User">
-        update user set 
-                        userName = #{userName},
-                        <if test="avatarUrl != null">avatarUrl=#{avatarUrl},</if>
-                        gender=#{gender},
-                        phone=#{phone},
-                        email=#{email},
-                        tags=#{tags},
-                        profile=#{profile}
+        update user
+        <set>
+            <if test="userName != null">userName = #{userName},</if>
+            <if test="avatarUrl != null">avatarUrl=#{avatarUrl},</if>
+            <if test="gender != null">gender=#{gender},</if>
+            <if test="phone != null">phone=#{phone},</if>
+            <if test="email != null">email=#{email},</if>
+            <if test="tags != null">tags=#{tags},</if>
+            <if test="profile != null">profile=#{profile},</if>
+        </set>
         where id = #{id}
     </update>
 
+    <select id="getUserById" parameterType="java.lang.Long" resultType="com.geek01.yupaoBackend.domain.User">
+        select * from user
+        where userRole=0 and id =#{id}
+    </select>
     <!--mp-->
     <!--<resultMap id="BaseResultMap" type="com.geek01.yupaoBackend.domain.User">
         <id property="id" column="id" jdbcType="BIGINT"/>
