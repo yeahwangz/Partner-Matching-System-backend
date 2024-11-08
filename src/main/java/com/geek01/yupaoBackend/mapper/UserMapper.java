@@ -40,4 +40,10 @@ public interface UserMapper /*mp用法 extends BaseMapper<User>*/ {
      * @return
      */
     User getUserById(Long id);
+
+    /**
+     * 根据id修改数据库中用户头像
+     * @param user
+     */
+    void updateAvatarUrlByUser(User user);
 }

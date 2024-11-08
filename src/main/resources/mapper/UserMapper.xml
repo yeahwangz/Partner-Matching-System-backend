@@ -37,6 +37,10 @@
         select * from user
         where userRole=0 and id =#{id}
     </select>
+    
+    <update id="updateAvatarUrlByUser" parameterType="com.geek01.yupaoBackend.domain.User">
+        update user set avatarUrl = #{avatarUrl} where id = #{id}
+    </update>
     <!--mp-->
     <!--<resultMap id="BaseResultMap" type="com.geek01.yupaoBackend.domain.User">
         <id property="id" column="id" jdbcType="BIGINT"/>

@@ -2,6 +2,7 @@ package com.geek01.yupaoBackend.service;
 
 import com.geek01.yupaoBackend.common.BaseResponse;
 import com.geek01.yupaoBackend.domain.User;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -60,4 +61,12 @@ public interface UserService /*extends IService<User>*/ {
      * @return
      */
     User getSaftyUserInfoByCookie(HttpServletRequest request);
+
+    /**
+     * 存储用户头像并返回给前端
+     * @param httpServletRequest
+     * @param file
+     * @return
+     */
+    String uploadImage(HttpServletRequest httpServletRequest, MultipartFile file);
 }

@@ -2,6 +2,7 @@ package com.geek01.yupaoBackend.controller;
 
 import com.geek01.yupaoBackend.common.BaseResponse;
 import com.geek01.yupaoBackend.common.ErrorCode;
+import com.geek01.yupaoBackend.common.ReturnType;
 import com.geek01.yupaoBackend.domain.User;
 import com.geek01.yupaoBackend.domain.request.UserLoginRequest;
 import com.geek01.yupaoBackend.domain.request.UserRegisterRequest;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -120,5 +122,19 @@ public class UserController {
     public BaseResponse<User> getSaftyUserInfoByCookie(HttpServletRequest request) {
         User safetyUser = userService.getSaftyUserInfoByCookie(request);
         return ResultUtils.success(safetyUser);
+    }
+
+    /**
+     * 存储用户头像并返回给前端
+     * @param file
+     * @return
+     */
+    @PostMapping("/upload/userImage")
+    @ApiOperation("存储用户头像并返回给前端")
+    public BaseResponse<String> uploadImage(HttpServletRequest request, @RequestBody MultipartFile file) {
+        if (file == null) {
+            return ResultUtils.error(ReturnType.StringType,ErrorCode.NULL_ERROR);
+        }
+        return ResultUtils.success(userService.uploadImage(request,file));
     }
 }

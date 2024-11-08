@@ -43,6 +43,16 @@ public class ResultUtils {
     /**
      * 失败
      *
+     * @param errorCode
+     * @return
+     */
+    public static <T> BaseResponse<java.lang.String> error(String returnType,ErrorCode errorCode) {
+        return new BaseResponse<java.lang.String>(errorCode);
+    }
+
+    /**
+     * 失败
+     *
      * @param code
      * @param message
      * @param description

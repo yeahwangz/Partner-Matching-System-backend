@@ -51,6 +51,17 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - com.geek01.yupaoBackend.controller
+aliyun:
+  oss:
+    #oss对应的区域节点
+    endpoint: ${aliyun.oss.endpoint}
+    # 阿里对应的访问id accessId
+    accessKeyId: ${aliyun.oss.accessKeyId}
+    # 阿里对应accessKey
+    accessKeySecret: ${aliyun.oss.accessKeySecret}
+    # bucketName oss上bucket的名称
+    bucketName: ${aliyun.oss.bucketName}
+
 #mybatis-plus:
 #  configuration:
 #    map-underscore-to-camel-case: false

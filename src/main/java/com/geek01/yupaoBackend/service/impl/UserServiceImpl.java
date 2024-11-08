@@ -6,16 +6,16 @@ import com.geek01.yupaoBackend.domain.User;
 import com.geek01.yupaoBackend.exception.ErrorException;
 import com.geek01.yupaoBackend.mapper.UserMapper;
 import com.geek01.yupaoBackend.service.UserService;
+import com.geek01.yupaoBackend.utils.AliOSSUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import java.io.Console;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -31,6 +31,8 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
     private final UserMapper userMapper;
 
     private static final String SALT = "01geek";
+
+    private final AliOSSUtils aliOSSUtils;
 
     /**
      * 根据标签搜索用户
@@ -194,5 +196,27 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
     public User getSaftyUserInfoByCookie(HttpServletRequest request) {
         User user = (User) request.getSession().getAttribute(UserConstant.USER_LOGIN_INFO);
         return getSafetyUser(user);
+    }
+
+    /**
+     * 存储用户头像并返回给前端
+     * @param httpServletRequest
+     * @param file
+     * @return
+     */
+    @Transactional
+    @Override
+    public String uploadImage(HttpServletRequest httpServletRequest, MultipartFile file) {
+        try {
+            String imageUrl = aliOSSUtils.upload(file);
+            User user =(User) httpServletRequest.getSession().getAttribute(UserConstant.USER_LOGIN_INFO);
+            User userToSql = new User();
+            userToSql.setId(user.getId());
+            userToSql.setAvatarUrl(imageUrl);
+            userMapper.updateAvatarUrlByUser(userToSql);
+            return imageUrl;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
