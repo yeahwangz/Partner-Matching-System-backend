@@ -8,10 +8,27 @@ spring:
   application:
     name: yupao-backend
   datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${spring.datasource.url}
     username: ${spring.datasource.username}
     password: ${spring.datasource.password}
+    #druid连接池配置
+    druid:
+      #初始化时建立物理连接的个数
+      initial-size: 10
+      #最小连接池数量
+      min-idle: 10
+      #最大连接池数量 maxIdle已经不再使用
+      max-active: 20
+      #获取连接时最大等待时间，单位毫秒
+      max-wait: 60000
+      #既作为检测的间隔时间又作为testWhileIdel执行的依据
+      time-between-eviction-runs-millis: 60000
+      #销毁线程时检测当前连接的最后活动时间和当前时间差大于该值时，关闭当前连接
+      min-evictable-idle-time-millis: 30000
+      #是否缓存preparedStatement,mysql5.5+建议开启
+      pool-prepared-statements: true
   #失效时间（min）
   session:
     timeout: 60000
@@ -31,8 +48,8 @@ logging:
       geek01:
         yupaoBackend:
           controller: info
-          service: info
-          mapper: debug
+          service: off
+          mapper: off
 knife4j:
   enable: ${knife4j.enable}
   openapi:

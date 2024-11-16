@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.geek01.yupaoBackend.mapper.TestMapper">
+    <insert id="insertUser" parameterType="com.geek01.yupaoBackend.domain.User">
+        insert into user (userAccount,userPassword) values
+                             (#{userAccount},#{userPassword})
+    </insert>
+
+    <insert id="insertBatchMybatis" parameterType="java.util.List">
+        insert into user (userAccount,userPassword) values
+        <foreach collection="list" separator="," item="user">
+            (#{user.userAccount},#{user.userPassword})
+        </foreach>
+    </insert>
+</mapper>
