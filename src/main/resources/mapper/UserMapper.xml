@@ -63,6 +63,18 @@
         </foreach>
     </select>
 
+    <select id="getAllUserNum" resultType="java.lang.Long">
+        select count(*) from user
+        where userStatus = 0 and isDelete = 0 and userRole = 0
+    </select>
+
+    <select id="getNormalUserOnePage" parameterType = "java.util.Map"
+            resultType="com.geek01.yupaoBackend.domain.vo.UserToRecommendVO">
+        select *
+        from user
+        limit #{everyPageSize} offset #{offset}
+    </select>
+    
     <!-- 自定义结果映射 -->
     <resultMap id="userResultMap" type="com.geek01.yupaoBackend.domain.po.UserSimilarPO">
         <result property="userId" column="userId"/>

@@ -5,6 +5,9 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * 推荐的心动用户 <= 100位
+ */
 @Data
 public class UserToRecommendVO implements Serializable {
     @Serial //jdk 14引入 可省略

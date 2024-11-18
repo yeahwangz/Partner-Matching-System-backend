@@ -17,7 +17,6 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static com.geek01.yupaoBackend.constant.UserConstant.USER_LOGIN_INFO;
 
@@ -284,6 +282,42 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
         List<UserToRecommendVO> userToRecommendVO = userMapper.getUserToRecommendVO(userSimilarPOList);
         userToRecommendVO.sort(Comparator.comparingInt(o -> map.get(o.getId())));
         return userToRecommendVO;
+    }
+
+    /**
+     * 根据用户的标签进行普通用户推荐
+     * @return
+     */
+    @Override
+    public List<UserToRecommendVO> getNormalRecommendUserList() {
+        return List.of();
+    }
+
+    /**
+     * 计算数据库中前端n条数据一页共可以显示m页，返回m
+     * @param everyPageSize
+     * @return
+     */
+    @Override
+    public Long getNormalUserPageNum(Integer everyPageSize) {
+        Long allUserNum = userMapper.getAllUserNum();
+        return (allUserNum - 1)/everyPageSize + ((allUserNum - 1) % everyPageSize == 0 ? 0:1);
+    }
+
+    /**
+     * 根据前端发送的页码数和每页数据量获取该页的用户
+     *
+     * @param nowPage
+     * @param everyPageSize
+     * @return
+     */
+    @Override
+    public List<UserToRecommendVO> getNormalUserOnePage(Long nowPage, Integer everyPageSize) {
+        Long offset = (nowPage-1)*everyPageSize;
+        Map<String,Object> params = new HashMap<>();
+        params.put("offset",offset);
+        params.put("everyPageSize",everyPageSize);
+        return userMapper.getNormalUserOnePage(params);
     }
 
 }

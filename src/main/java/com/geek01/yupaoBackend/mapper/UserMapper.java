@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.cursor.Cursor;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface UserMapper /*mp用法 extends BaseMapper<User>*/ {
@@ -68,4 +69,17 @@ public interface UserMapper /*mp用法 extends BaseMapper<User>*/ {
      * @return
      */
     List<UserToRecommendVO> getUserToRecommendVO(List<UserSimilarPO> userSimilarPOList);
+
+    /**
+     * 计算数据库中前端n条数据一页共可以显示m页，返回m
+     * @return
+     */
+    Long getAllUserNum();
+
+    /**
+     * 根据前端发送的页码数和每页数据量获取该页的用户
+     * @param map
+     * @return
+     */
+    List<UserToRecommendVO> getNormalUserOnePage(Map<String,Object> map);
 }

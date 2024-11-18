@@ -76,4 +76,26 @@ public interface UserService /*extends IService<User>*/ {
      * @return
      */
     List<UserToRecommendVO> getRecommendUserList(HttpServletRequest request);
+
+    /**
+     * 根据用户的标签进行普通用户推荐
+     * @return
+     */
+    List<UserToRecommendVO> getNormalRecommendUserList();
+
+    /**
+     * 计算数据库中前端n条数据一页共可以显示m页，返回m
+     * @param everyPageSize
+     * @return
+     */
+    Long getNormalUserPageNum(Integer everyPageSize);
+
+    /**
+     * 根据前端发送的页码数和每页数据量获取该页的用户
+     *
+     * @param nowPage
+     * @param everyPageSize
+     * @return
+     */
+    List<UserToRecommendVO> getNormalUserOnePage(Long nowPage, Integer everyPageSize);
 }

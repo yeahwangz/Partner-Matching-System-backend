@@ -3,7 +3,6 @@ package com.geek01.yupaoBackend.controller;
 import com.geek01.yupaoBackend.common.BaseResponse;
 import com.geek01.yupaoBackend.common.ErrorCode;
 import com.geek01.yupaoBackend.common.ReturnType;
-import com.geek01.yupaoBackend.constant.UserConstant;
 import com.geek01.yupaoBackend.domain.User;
 import com.geek01.yupaoBackend.domain.request.UserLoginRequest;
 import com.geek01.yupaoBackend.domain.request.UserRegisterRequest;
@@ -145,9 +144,49 @@ public class UserController {
      * @param request
      * @return
      */
-    @GetMapping
-    @ApiOperation("根据用户的标签进行用户推荐")
-    public BaseResponse<List<UserToRecommendVO>> getRecommendUserList(HttpServletRequest request){
+    @GetMapping("/recommend/loveUser")
+    @ApiOperation("根据用户的标签进行心动用户推荐")
+    public BaseResponse<List<UserToRecommendVO>> getLoveRecommendUserList(HttpServletRequest request){
         return ResultUtils.success(userService.getRecommendUserList(request));
+    }
+
+    /**
+     * 根据用户的标签进行普通用户推荐
+     * @return
+     */
+    @GetMapping("/recommend/normalUser")
+    @ApiOperation("根据用户的标签进行普通用户推荐")
+    public BaseResponse<List<UserToRecommendVO>> getNormalRecommendUserList(){
+        return ResultUtils.success(userService.getNormalRecommendUserList());
+    }
+
+    /**
+     * 计算数据库中前端n条数据一页共可以显示m页，返回m
+     * @param everyPageSize
+     * @return
+     */
+    @GetMapping("/recommend/normalUserPageNum")
+    @ApiOperation("计算数据库中前端n条数据一页共可以显示m页，返回m")
+    public BaseResponse<Long> getNormalUserPageNum(@RequestParam Integer everyPageSize){
+        if (everyPageSize < 1) {
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR,1L);
+        }
+        return ResultUtils.success(userService.getNormalUserPageNum(everyPageSize));
+    }
+
+    /**
+     * 根据前端发送的页码数和每页数据量获取该页的用户
+     * @param nowPage
+     * @param everyPageSize
+     * @return
+     */
+    @GetMapping("/recommend/normalUserOnePage")
+    @ApiOperation("根据前端发送的页码数和每页数据量获取该页的用户")
+    public BaseResponse<List<UserToRecommendVO>> getNormalUserOnePage(@RequestParam Long nowPage
+            ,@RequestParam Integer everyPageSize){
+        if ( nowPage < 1 || everyPageSize < 1) {
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR,new ArrayList<>());
+        }
+        return ResultUtils.success(userService.getNormalUserOnePage(nowPage,everyPageSize));
     }
 }
