@@ -11,5 +11,20 @@ public interface TestService {
      */
     void insertUser(User user);
 
+    /**
+     * sql批量插入
+     * @param users
+     */
     void insertBatchMybatis(List<User> users);
+
+    /**
+     * 根据用户id从user表删除用户
+     * @param id
+     */
+    void deleteUserById(Integer id);
+
+    /**
+     * 删除用户，需根据情况自己修改
+     */
+    void deleteUser();
 }

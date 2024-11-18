@@ -1,7 +1,7 @@
 package com.geek01.yupaoBackend.service;
 
-import com.geek01.yupaoBackend.common.BaseResponse;
 import com.geek01.yupaoBackend.domain.User;
+import com.geek01.yupaoBackend.domain.vo.UserToRecommendVO;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -69,4 +69,11 @@ public interface UserService /*extends IService<User>*/ {
      * @return
      */
     String uploadImage(HttpServletRequest httpServletRequest, MultipartFile file);
+
+    /**
+     * 根据用户的标签进行用户推荐 选取前100条最匹配的
+     * @param request
+     * @return
+     */
+    List<UserToRecommendVO> getRecommendUserList(HttpServletRequest request);
 }

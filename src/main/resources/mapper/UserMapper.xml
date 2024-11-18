@@ -41,6 +41,34 @@
     <update id="updateAvatarUrlByUser" parameterType="com.geek01.yupaoBackend.domain.User">
         update user set avatarUrl = #{avatarUrl} where id = #{id}
     </update>
+
+    <select id="selectUsersHaveTagsByCursor" resultMap="userResultMap" parameterType="java.lang.Long">
+        select *
+        from user_tag_forsearch
+        where tags IS NOT NULL and userId != #{userId}
+    </select>
+
+    <select id="queryCountUsersHaveTags" resultType="java.lang.Integer">
+        select count(*) from user_tag_forsearch
+        where tags IS NOT NULL
+    </select>
+
+    <select id="getUserToRecommendVO" parameterType="java.util.List"
+            resultType="com.geek01.yupaoBackend.domain.vo.UserToRecommendVO">
+        select * from user
+        where userStatus = 0 and isDelete=0 and userRole=0 and
+        id in
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item.userId}
+        </foreach>
+    </select>
+
+    <!-- 自定义结果映射 -->
+    <resultMap id="userResultMap" type="com.geek01.yupaoBackend.domain.po.UserSimilarPO">
+        <result property="userId" column="userId"/>
+        <result property="tags" column="tags"/>
+    </resultMap>
+
     <!--mp-->
     <!--<resultMap id="BaseResultMap" type="com.geek01.yupaoBackend.domain.User">
         <id property="id" column="id" jdbcType="BIGINT"/>

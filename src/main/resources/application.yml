@@ -48,8 +48,8 @@ logging:
       geek01:
         yupaoBackend:
           controller: info
-          service: off
-          mapper: off
+          service: info
+          mapper: info
 knife4j:
   enable: ${knife4j.enable}
   openapi:

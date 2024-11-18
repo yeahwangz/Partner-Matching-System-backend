@@ -1,7 +1,10 @@
 package com.geek01.yupaoBackend.mapper;
 
 import com.geek01.yupaoBackend.domain.User;
+import com.geek01.yupaoBackend.domain.po.UserSimilarPO;
+import com.geek01.yupaoBackend.domain.vo.UserToRecommendVO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.cursor.Cursor;
 
 import java.util.List;
 
@@ -46,4 +49,23 @@ public interface UserMapper /*mp用法 extends BaseMapper<User>*/ {
      * @param user
      */
     void updateAvatarUrlByUser(User user);
+
+    /**
+     * 使用流式查询搜索所有用户
+     * @return
+     */
+    Cursor<UserSimilarPO> selectUsersHaveTagsByCursor(Long userId);
+
+    /**
+     * 获得user表中用户信息条数
+     * @return
+     */
+    Integer queryCountUsersHaveTags();
+
+    /**
+     * 获取最终推荐的maxCapacity个用户信息
+     * @param userSimilarPOList
+     * @return
+     */
+    List<UserToRecommendVO> getUserToRecommendVO(List<UserSimilarPO> userSimilarPOList);
 }

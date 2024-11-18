@@ -1,25 +1,31 @@
 package com.geek01.yupaoBackend.service.impl;
 
+import com.geek01.yupaoBackend.algorithm.LevenshteinDistance;
 import com.geek01.yupaoBackend.common.ErrorCode;
 import com.geek01.yupaoBackend.constant.UserConstant;
 import com.geek01.yupaoBackend.domain.User;
+import com.geek01.yupaoBackend.domain.po.UserSimilarPO;
+import com.geek01.yupaoBackend.domain.vo.UserToRecommendVO;
 import com.geek01.yupaoBackend.exception.ErrorException;
 import com.geek01.yupaoBackend.mapper.UserMapper;
 import com.geek01.yupaoBackend.service.UserService;
 import com.geek01.yupaoBackend.utils.AliOSSUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.geek01.yupaoBackend.constant.UserConstant.USER_LOGIN_INFO;
 
@@ -33,6 +39,10 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
     private static final String SALT = "01geek";
 
     private final AliOSSUtils aliOSSUtils;
+
+    private final SqlSessionFactory sqlSessionFactory;
+
+    private final LevenshteinDistance levenshteinDistance;
 
     /**
      * 根据标签搜索用户
@@ -219,4 +229,61 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * 根据用户的标签进行用户推荐 选取前100条最匹配的
+     * @param request
+     * @return
+     */
+    @Override
+    public List<UserToRecommendVO> getRecommendUserList(HttpServletRequest request) {
+        User LoginUser = (User) request.getSession().getAttribute(USER_LOGIN_INFO);
+        String tags = LoginUser.getTags();
+        // 最大容量
+        int maxCapacity = 100;
+        List<UserSimilarPO> userSimilarPOList = new ArrayList<>();
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+        try {
+            //获取到指定mapper
+            UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+            //调用指定mapper的方法，返回一个cursor
+            Cursor<UserSimilarPO> cursor = mapper.selectUsersHaveTagsByCursor(LoginUser.getId());
+            //查询数据总量
+            //Integer total = mapper.queryCountUsersHaveTags();
+            //定义一个list，用来从cursor中读取数据，每读取够1000条的时候，开始处理这批数据；
+            //当前批数据处理完之后，清空list，准备接收下一批次数据；直到大量的数据全部处理完；
+            //List<User> userList = new ArrayList<>();
+            if (cursor != null) {
+                for (UserSimilarPO userSimilarPO : cursor) {
+                    Long distance = levenshteinDistance.getDistance(tags, userSimilarPO.getTags());
+                    userSimilarPO.setSimilarity(distance);
+                    //插入数据
+                    userSimilarPOList.add(userSimilarPO);
+                }
+                userSimilarPOList.sort(Comparator.comparing(UserSimilarPO::getSimilarity));
+                if (userSimilarPOList.size() > maxCapacity) {
+                    userSimilarPOList = userSimilarPOList.subList(0, maxCapacity);
+                }
+            }
+            sqlSession.commit();
+        }catch (Exception
+                e){
+            System.out.println("PriorityQueue<UserSimilarPO>获取失败：" + e);
+            sqlSession.rollback();
+        }
+        finally {
+            if (sqlSession != null) {
+                //全部数据读取并且做好其他业务操作之后，提交事务并关闭连接；
+                sqlSession.close();
+            }
+        }
+        Map<Long,Integer> map = new HashMap<>();
+        for (int i = 0; i < userSimilarPOList.size(); i++) {
+            map.put(userSimilarPOList.get(i).getUserId(), i);
+        }
+        List<UserToRecommendVO> userToRecommendVO = userMapper.getUserToRecommendVO(userSimilarPOList);
+        userToRecommendVO.sort(Comparator.comparingInt(o -> map.get(o.getId())));
+        return userToRecommendVO;
+    }
+
 }

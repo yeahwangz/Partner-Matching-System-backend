@@ -3,9 +3,11 @@ package com.geek01.yupaoBackend.controller;
 import com.geek01.yupaoBackend.common.BaseResponse;
 import com.geek01.yupaoBackend.common.ErrorCode;
 import com.geek01.yupaoBackend.common.ReturnType;
+import com.geek01.yupaoBackend.constant.UserConstant;
 import com.geek01.yupaoBackend.domain.User;
 import com.geek01.yupaoBackend.domain.request.UserLoginRequest;
 import com.geek01.yupaoBackend.domain.request.UserRegisterRequest;
+import com.geek01.yupaoBackend.domain.vo.UserToRecommendVO;
 import com.geek01.yupaoBackend.service.UserService;
 import com.geek01.yupaoBackend.utils.ResultUtils;
 import com.github.xiaoymin.knife4j.core.util.CollectionUtils;
@@ -136,5 +138,16 @@ public class UserController {
             return ResultUtils.error(ReturnType.StringType,ErrorCode.NULL_ERROR);
         }
         return ResultUtils.success(userService.uploadImage(request,file));
+    }
+
+    /**
+     * 根据用户的标签进行用户推荐 选取前100条最匹配的
+     * @param request
+     * @return
+     */
+    @GetMapping
+    @ApiOperation("根据用户的标签进行用户推荐")
+    public BaseResponse<List<UserToRecommendVO>> getRecommendUserList(HttpServletRequest request){
+        return ResultUtils.success(userService.getRecommendUserList(request));
     }
 }

@@ -12,4 +12,12 @@
             (#{user.userAccount},#{user.userPassword})
         </foreach>
     </insert>
+    
+    <delete id="deleteUserById" parameterType="java.lang.Integer">
+        delete from user where id = #{id}
+    </delete>
+
+    <delete id="deleteUser">
+        delete from user where id >= 7
+    </delete>
 </mapper>

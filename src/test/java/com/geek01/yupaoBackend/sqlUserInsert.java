@@ -66,7 +66,7 @@ public class sqlUserInsert {
         Date beforeDate = new Date();
         for (int i = 0; i < 2000 ; i++) {
             List<User> users = new ArrayList<>();
-            for (int j = 80000+10*i; j < 80000+10*(i+1); j++) {
+            for (int j = 0+10*i; j < 0+10*(i+1); j++) {
                 User user = new User();
                 user.setUserAccount(String.valueOf(j));
                 user.setUserPassword(String.valueOf(123456));

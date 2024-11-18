@@ -33,4 +33,18 @@ public class TestServiceImpl implements TestService {
         testMapper.insertBatchMybatis(users);
     }
 
+    @Override
+    public void deleteUserById(Integer id) {
+        testMapper.deleteUserById(id);
+    }
+
+    /**
+     * 删除用户，需根据情况自己修改
+     */
+    @Override
+    public void deleteUser() {
+        testMapper.deleteUser();
+    }
+
+
 }
