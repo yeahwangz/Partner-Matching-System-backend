@@ -74,10 +74,80 @@
         from user
         limit #{everyPageSize} offset #{offset}
     </select>
-    
+
+    <insert id="createNewTeam" parameterType="com.geek01.yupaoBackend.domain.po.TeamPO"
+    useGeneratedKeys="true" keyProperty="id">
+        insert into team
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            teamName,
+            <if test="profile != null">profile,</if>
+            <if test="tags != null">tags,</if>
+            <if test="avatarUrl != null">avatarUrl,</if>
+            currentMember,
+            historyMember,
+            historyLeader
+        </trim>
+        <trim prefix=" values (" suffix=")" suffixOverrides=",">
+            #{teamName},
+            <if test="profile != null">#{profile},</if>
+            <if test="tags != null">#{tags},</if>
+            <if test="avatarUrl != null">#{avatarUrl},</if>
+            #{currentMember},
+            #{historyMember},
+            #{historyLeader}
+        </trim>
+    </insert>
+
+    <select id="getTeamById" parameterType="java.lang.Long" resultType="com.geek01.yupaoBackend.domain.po.TeamPO">
+        select * from team
+        where id = #{teamId}
+    </select>
+
+    <select id="getAllTeamNum" resultType="java.lang.Long">
+        select count(*) from team
+        where isDelete = 0
+    </select>
+
+    <select id="getNormalTeamOnePage" parameterType = "java.util.Map"
+            resultType="com.geek01.yupaoBackend.domain.vo.TeamVO">
+        select *
+        from team
+        limit #{everyPageSize} offset #{offset}
+    </select>
+
+    <select id="selectTeamsHaveTagsByCursor" resultMap="teamResultMap" parameterType="java.lang.Long">
+        select *
+        from team_tag_forsearch
+        where tags IS NOT NULL and teamId != #{id}
+    </select>
+
+    <select id="getTeamVO" parameterType="java.util.List"
+            resultType="com.geek01.yupaoBackend.domain.vo.TeamVO">
+        select * from team
+        where isDelete = 0 and
+        id in
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item.teamId}
+        </foreach>
+    </select>
+
+    <update id="updateTeamAvatarUrl">
+        update team set avatarUrl = #{imageUrl} where id = #{teamId}
+    </update>
+
+    <select id="getTeamIdListByUserId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select id from team
+        where json_contains(currentMember,json_array(#{userId}))
+    </select>
+
     <!-- 自定义结果映射 -->
     <resultMap id="userResultMap" type="com.geek01.yupaoBackend.domain.po.UserSimilarPO">
         <result property="userId" column="userId"/>
+        <result property="tags" column="tags"/>
+    </resultMap>
+
+    <resultMap id="teamResultMap" type="com.geek01.yupaoBackend.domain.po.TeamSimilarPO">
+        <result property="teamId" column="teamId"/>
         <result property="tags" column="tags"/>
     </resultMap>
 

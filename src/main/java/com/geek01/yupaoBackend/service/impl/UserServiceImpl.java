@@ -4,7 +4,11 @@ import com.geek01.yupaoBackend.algorithm.LevenshteinDistance;
 import com.geek01.yupaoBackend.common.ErrorCode;
 import com.geek01.yupaoBackend.constant.UserConstant;
 import com.geek01.yupaoBackend.domain.User;
+import com.geek01.yupaoBackend.domain.dto.TeamDTO;
+import com.geek01.yupaoBackend.domain.po.TeamPO;
+import com.geek01.yupaoBackend.domain.po.TeamSimilarPO;
 import com.geek01.yupaoBackend.domain.po.UserSimilarPO;
+import com.geek01.yupaoBackend.domain.vo.TeamVO;
 import com.geek01.yupaoBackend.domain.vo.UserToRecommendVO;
 import com.geek01.yupaoBackend.exception.ErrorException;
 import com.geek01.yupaoBackend.mapper.UserMapper;
@@ -207,14 +211,14 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
     }
 
     /**
-     * 存储用户头像并返回给前端
+     * 存储队伍头像并返回给前端
      * @param httpServletRequest
      * @param file
      * @return
      */
     @Transactional
     @Override
-    public String uploadImage(HttpServletRequest httpServletRequest, MultipartFile file) {
+    public String uploadUserImage(HttpServletRequest httpServletRequest, MultipartFile file) {
         try {
             String imageUrl = aliOSSUtils.upload(file);
             User user =(User) httpServletRequest.getSession().getAttribute(UserConstant.USER_LOGIN_INFO);
@@ -285,16 +289,7 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
     }
 
     /**
-     * 根据用户的标签进行普通用户推荐
-     * @return
-     */
-    @Override
-    public List<UserToRecommendVO> getNormalRecommendUserList() {
-        return List.of();
-    }
-
-    /**
-     * 计算数据库中前端n条数据一页共可以显示m页，返回m
+     * 计算数据库中前端user，n条数据一页共可以显示m页，返回m
      * @param everyPageSize
      * @return
      */
@@ -318,6 +313,187 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
         params.put("offset",offset);
         params.put("everyPageSize",everyPageSize);
         return userMapper.getNormalUserOnePage(params);
+    }
+
+    /**
+     * 创建新队伍
+     *
+     * @param request
+     * @param teamDTO
+     * @return
+     */
+    @Override
+    public TeamVO createNewTeam(HttpServletRequest request, TeamDTO teamDTO) {
+        User loginUser = (User) request.getSession().getAttribute(USER_LOGIN_INFO);
+        Long userId = loginUser.getId();
+        TeamPO teamPO = new TeamPO();
+        List<Long> memberAndLeader = new ArrayList<>();
+        memberAndLeader.add(userId);
+        String memberAndLeaderString = memberAndLeader.toString();
+        teamPO.setCurrentMember(memberAndLeaderString);
+        teamPO.setHistoryMember(memberAndLeaderString);
+        teamPO.setHistoryLeader(memberAndLeaderString);
+        if (teamDTO.getProfile() == null || teamDTO.getTeamName().isBlank()) {
+            throw new RuntimeException("队伍名非法");
+        }
+        teamPO.setTeamName(teamDTO.getTeamName());
+        if (teamDTO.getProfile() != null && !teamDTO.getProfile().isBlank()) {
+            teamPO.setProfile(teamDTO.getProfile());
+        }
+        if (teamDTO.getProfile() != null && !teamDTO.getTags().isBlank()) {
+            teamPO.setTags(teamDTO.getTags());
+        }
+        if (teamDTO.getAvatarUrl() != null) {
+            if (!teamDTO.getAvatarUrl().isBlank()){
+                teamPO.setAvatarUrl(teamDTO.getAvatarUrl());
+            }
+        }
+        userMapper.createNewTeam(teamPO);
+        return this.getSafetyTeam(teamPO);
+    }
+
+    /**
+     * 计算数据库中前端team，n条数据一页共可以显示m页，返回m
+     * @param everyPageSize
+     * @return
+     */
+    @Override
+    public Long getNormalTeamPageNum(Integer everyPageSize) {
+        Long allTeamNum = userMapper.getAllTeamNum();
+        return (allTeamNum - 1)/everyPageSize + ((allTeamNum - 1) % everyPageSize == 0 ? 0:1);
+    }
+
+    /**
+     * 根据前端发送的页码数和每页数据量获取该页的team
+     * @param nowPage
+     * @param everyPageSize
+     * @return
+     */
+    @Override
+    public List<TeamVO> getNormalTeamOnePage(Long nowPage, Integer everyPageSize) {
+        Long offset = (nowPage-1)*everyPageSize;
+        Map<String,Object> params = new HashMap<>();
+        params.put("offset",offset);
+        params.put("everyPageSize",everyPageSize);
+        return userMapper.getNormalTeamOnePage(params);
+    }
+
+    /**
+     * 根据用户的标签进行队伍推荐 选取前100条最匹配的
+     * @param request
+     * @return
+     */
+    @Override
+    public List<TeamVO> getRecommendTeamList(HttpServletRequest request) {
+        User LoginUser = (User) request.getSession().getAttribute(USER_LOGIN_INFO);
+        String tags = LoginUser.getTags();
+        // 最大容量
+        int maxCapacity = 100;
+        List<TeamSimilarPO> teamSimilarPOList = new ArrayList<>();
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+        try {
+            //获取到指定mapper
+            UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+            TeamPO teamById = userMapper.getTeamById(LoginUser.getId());
+            Long teamId;
+            if (teamById != null) {
+                teamId = teamById.getId();
+            }
+            teamId = -1L;
+            //调用指定mapper的方法，返回一个cursor
+            Cursor<TeamSimilarPO> cursor = mapper.selectTeamsHaveTagsByCursor(teamId);
+            //查询数据总量
+            //Integer total = mapper.queryCountUsersHaveTags();
+            //定义一个list，用来从cursor中读取数据，每读取够1000条的时候，开始处理这批数据；
+            //当前批数据处理完之后，清空list，准备接收下一批次数据；直到大量的数据全部处理完；
+            //List<User> userList = new ArrayList<>();
+            if (cursor != null) {
+                for (TeamSimilarPO teamSimilarPO : cursor) {
+                    Long distance = levenshteinDistance.getDistance(tags, teamSimilarPO.getTags());
+                    teamSimilarPO.setSimilarity(distance);
+                    //插入数据
+                    teamSimilarPOList.add(teamSimilarPO);
+                }
+                teamSimilarPOList.sort(Comparator.comparing(TeamSimilarPO::getSimilarity));
+                if (teamSimilarPOList.size() > maxCapacity) {
+                    teamSimilarPOList = teamSimilarPOList.subList(0, maxCapacity);
+                }
+            }
+            sqlSession.commit();
+        }catch (Exception e){
+            System.out.println("PriorityQueue<TeamSimilarPO>获取失败：" + e);
+            sqlSession.rollback();
+        }
+        finally {
+            if (sqlSession != null) {
+                //全部数据读取并且做好其他业务操作之后，提交事务并关闭连接；
+                sqlSession.close();
+            }
+        }
+        Map<Long,Integer> map = new HashMap<>();
+        for (int i = 0; i < teamSimilarPOList.size(); i++) {
+            map.put(teamSimilarPOList.get(i).getTeamId(), i);
+        }
+        List<TeamVO> teamVO = userMapper.getTeamVO(teamSimilarPOList);
+        teamVO.sort(Comparator.comparingInt(o -> map.get(o.getId())));
+        return teamVO;
+    }
+
+    /**
+     * 存储队伍头像并返回给前端
+     * @param file
+     * @param teamId
+     * @return
+     */
+    @Transactional
+    @Override
+    public String uploadTeamImage(MultipartFile file, Long teamId) {
+        try {
+            String imageUrl = aliOSSUtils.upload(file);
+            userMapper.updateTeamAvatarUrl(imageUrl,teamId);
+            return imageUrl;
+        } catch (Exception e) {
+            throw new RuntimeException("存储队伍头像并返回给前端出错：" + e);
+        }
+    }
+
+    /**
+     * 获取用户已经加入的队伍
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<Long> getTeamIdListByUserId(Long userId) {
+        return userMapper.getTeamIdListByUserId(userId);
+    }
+
+    /**
+     * 加入队伍
+     * @param request
+     * @param teamId
+     * @return
+     */
+    @Override
+    public Boolean joinTeam(HttpServletRequest request, Long teamId) {
+        return null;
+    }
+
+
+    /**
+     * 处理得到安全的队伍信息
+     * @param team
+     * @return
+     */
+    private TeamVO getSafetyTeam(TeamPO team) {
+        TeamVO safetyTeamVO = new TeamVO();
+        safetyTeamVO.setId(team.getId());
+        safetyTeamVO.setTeamName(team.getTeamName());
+        safetyTeamVO.setProfile(team.getProfile());
+        safetyTeamVO.setTags(team.getTags());
+        safetyTeamVO.setAvatarUrl(team.getAvatarUrl());
+        safetyTeamVO.setCurrentMember(team.getCurrentMember());
+        safetyTeamVO.setMaxMemberNum(team.getMaxMemberNum());
+        return safetyTeamVO;
     }
 
 }

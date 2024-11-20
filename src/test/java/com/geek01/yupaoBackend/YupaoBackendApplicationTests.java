@@ -1,5 +1,6 @@
 package com.geek01.yupaoBackend;
 
+import com.alibaba.druid.support.json.JSONUtils;
 import com.geek01.yupaoBackend.algorithm.LevenshteinDistance;
 import com.geek01.yupaoBackend.domain.User;
 import com.geek01.yupaoBackend.mapper.TestMapper;
@@ -56,7 +57,12 @@ class YupaoBackendApplicationTests {
 
         /*testMapper.deleteUserById(100067);*/
 
-        testMapper.deleteUser();
+        /*testMapper.deleteUser();*/
+
+/*        String s = "[1,2,3]";
+        List<Integer> parse = (List<Integer>) JSONUtils.parse(s);
+        System.out.println("数据类型："+ parse.getClass() + "，具体值：" + parse);
+        parse.forEach(System.out::println);*/
     }
 
 

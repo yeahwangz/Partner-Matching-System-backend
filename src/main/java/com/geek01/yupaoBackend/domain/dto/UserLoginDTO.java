@@ -1,15 +1,15 @@
-package com.geek01.yupaoBackend.domain.request;
+package com.geek01.yupaoBackend.domain.dto;
 
 import lombok.Data;
 
 import java.io.Serializable;
 
 @Data
-public class UserRegisterRequest implements Serializable {
+public class UserLoginDTO implements Serializable {
     /**
      * 确保序列化和反序列化过程中类的兼容性
      */
-    private static final long serialVersionUID = 6554865L;
+    private static final long serialVersionUID = 8795666L;
 
     /**
      * 用户账号
@@ -20,9 +20,4 @@ public class UserRegisterRequest implements Serializable {
      * 用户密码
      */
     private String userPassword;
-
-    /**
-     * 校验密码
-     */
-    private String checkPassword;
 }

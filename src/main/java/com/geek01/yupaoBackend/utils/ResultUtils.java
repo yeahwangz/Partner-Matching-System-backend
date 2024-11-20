@@ -2,13 +2,11 @@ package com.geek01.yupaoBackend.utils;
 
 import com.geek01.yupaoBackend.common.BaseResponse;
 import com.geek01.yupaoBackend.common.ErrorCode;
-import org.apache.poi.ss.formula.functions.T;
 
 /**
  * 返回工具类
  */
 public class ResultUtils {
-
     /**
      * 成功
      *
@@ -46,8 +44,8 @@ public class ResultUtils {
      * @param errorCode
      * @return
      */
-    public static <T> BaseResponse<java.lang.String> error(String returnType,ErrorCode errorCode) {
-        return new BaseResponse<java.lang.String>(errorCode);
+    public static <T> BaseResponse<String> error(String returnType,ErrorCode errorCode) {
+        return new BaseResponse<String>(errorCode);
     }
 
     /**

@@ -1,6 +1,8 @@
 package com.geek01.yupaoBackend.service;
 
 import com.geek01.yupaoBackend.domain.User;
+import com.geek01.yupaoBackend.domain.dto.TeamDTO;
+import com.geek01.yupaoBackend.domain.vo.TeamVO;
 import com.geek01.yupaoBackend.domain.vo.UserToRecommendVO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -68,7 +70,7 @@ public interface UserService /*extends IService<User>*/ {
      * @param file
      * @return
      */
-    String uploadImage(HttpServletRequest httpServletRequest, MultipartFile file);
+    String uploadUserImage(HttpServletRequest httpServletRequest, MultipartFile file);
 
     /**
      * 根据用户的标签进行用户推荐 选取前100条最匹配的
@@ -78,13 +80,7 @@ public interface UserService /*extends IService<User>*/ {
     List<UserToRecommendVO> getRecommendUserList(HttpServletRequest request);
 
     /**
-     * 根据用户的标签进行普通用户推荐
-     * @return
-     */
-    List<UserToRecommendVO> getNormalRecommendUserList();
-
-    /**
-     * 计算数据库中前端n条数据一页共可以显示m页，返回m
+     * 计算数据库中前端user，n条数据一页共可以显示m页，返回m
      * @param everyPageSize
      * @return
      */
@@ -98,4 +94,58 @@ public interface UserService /*extends IService<User>*/ {
      * @return
      */
     List<UserToRecommendVO> getNormalUserOnePage(Long nowPage, Integer everyPageSize);
+
+    /**
+     * 创建新队伍
+     *
+     * @param request
+     * @param teamDTO
+     * @return
+     */
+    TeamVO createNewTeam(HttpServletRequest request, TeamDTO teamDTO);
+
+    /**
+     * 计算数据库中前端team，n条数据一页共可以显示m页，返回m
+     * @param everyPageSize
+     * @return
+     */
+    Long getNormalTeamPageNum(Integer everyPageSize);
+
+    /**
+     * 根据前端发送的页码数和每页数据量获取该页的team
+     * @param nowPage
+     * @param everyPageSize
+     * @return
+     */
+    List<TeamVO> getNormalTeamOnePage(Long nowPage, Integer everyPageSize);
+
+    /**
+     * 根据队伍的标签进行用户推荐 选取前100条最匹配的
+     * @param request
+     * @return
+     */
+    List<TeamVO> getRecommendTeamList(HttpServletRequest request);
+
+    /**
+     * 存储队伍头像并返回给前端
+     * @param file
+     * @param teamId
+     * @return
+     */
+    String uploadTeamImage(MultipartFile file, Long teamId);
+
+    /**
+     * 获取用户已经加入的队伍
+     * @param userId
+     * @return
+     */
+    List<Long> getTeamIdListByUserId(Long userId);
+
+    /**
+     * 加入队伍
+     * @param request
+     * @param teamId
+     * @return
+     */
+    Boolean joinTeam(HttpServletRequest request, Long teamId);
 }
