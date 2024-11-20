@@ -141,4 +141,13 @@ public interface UserMapper /*mp用法 extends BaseMapper<User>*/ {
      * @return
      */
     List<Long> getTeamIdListByUserId(Long userId);
+
+    /**
+     * 加入队伍
+     * @param userId
+     * @param teamId
+     */
+    void joinTeam(@Param("userId") Long userId,@Param("teamId") Long teamId);
+
+
 }

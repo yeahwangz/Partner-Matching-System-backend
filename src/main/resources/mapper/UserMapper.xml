@@ -140,6 +140,12 @@
         where json_contains(currentMember,json_array(#{userId}))
     </select>
 
+    <update id="joinTeam">
+        update team set currentMember = json_array_append(currentMember,'$',#{userId}),
+                        historyMember = json_array_append(historyMember,'$',#{userId})
+                    where id = #{teamId};
+    </update>
+
     <!-- 自定义结果映射 -->
     <resultMap id="userResultMap" type="com.geek01.yupaoBackend.domain.po.UserSimilarPO">
         <result property="userId" column="userId"/>

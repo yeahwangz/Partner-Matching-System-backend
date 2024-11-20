@@ -475,7 +475,10 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
      */
     @Override
     public Boolean joinTeam(HttpServletRequest request, Long teamId) {
-        return null;
+        User loginUser = (User) request.getSession().getAttribute(USER_LOGIN_INFO);
+        Long userId = loginUser.getId();
+        userMapper.joinTeam(userId,teamId);
+        return true;
     }
 
 
