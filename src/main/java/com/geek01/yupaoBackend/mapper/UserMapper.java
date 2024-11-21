@@ -169,4 +169,11 @@ public interface UserMapper /*mp用法 extends BaseMapper<User>*/ {
      * @param teamId
      */
     void deleteTeam(Long teamId);
+
+    /**
+     * 转让队长
+     * @param teamId
+     * @param futureLeaderId
+     */
+    void changeLeader(@Param("teamId") Long teamId, @Param("futureLeaderId") Long futureLeaderId);
 }

@@ -516,6 +516,28 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
     }
 
     /**
+     * 转让队长
+     * @param request
+     * @param teamId
+     * @param futureLeaderId
+     * @return
+     */
+    @Override
+    public Boolean changeLeader(HttpServletRequest request, Long teamId, Long futureLeaderId) {
+        Long loginUserId = getLoginUserId(request);
+        Long currentTeamLeaderId = userMapper.getCurrentTeamLeaderId(teamId);
+        if (!currentTeamLeaderId.equals(loginUserId)) {
+            throw new RuntimeException("越权");
+        }
+        List<Long> teamIdListByUserId = userMapper.getTeamIdListByUserId(futureLeaderId);
+        if (!teamIdListByUserId.contains(teamId)) {
+            throw new RuntimeException("要授予队长的用户不在该队伍中");
+        }
+        userMapper.changeLeader(teamId,futureLeaderId);
+        return true;
+    }
+
+    /**
      * 获取登录用户id
      * @param request
      * @return

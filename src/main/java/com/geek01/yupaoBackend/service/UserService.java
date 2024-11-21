@@ -164,4 +164,13 @@ public interface UserService /*extends IService<User>*/ {
      * @return
      */
     Boolean deleteTeam(HttpServletRequest request, Long teamId);
+
+    /**
+     * 转让队长
+     * @param request
+     * @param teamId
+     * @param futureLeaderId
+     * @return
+     */
+    Boolean changeLeader(HttpServletRequest request, Long teamId, Long futureLeaderId);
 }

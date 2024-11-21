@@ -100,7 +100,7 @@
 
     <select id="getTeamById" parameterType="java.lang.Long" resultType="com.geek01.yupaoBackend.domain.po.TeamPO">
         select * from team
-        where id = #{teamId}
+        where id = #{teamId} and isDelete = 0
     </select>
 
     <select id="getAllTeamNum" resultType="java.lang.Long">
@@ -112,6 +112,7 @@
             resultType="com.geek01.yupaoBackend.domain.vo.TeamVO">
         select *
         from team
+        where isDelete = 0
         limit #{everyPageSize} offset #{offset}
     </select>
 
@@ -132,23 +133,23 @@
     </select>
 
     <update id="updateTeamAvatarUrl">
-        update team set avatarUrl = #{imageUrl} where id = #{teamId}
+        update team set avatarUrl = #{imageUrl} where id = #{teamId} and isDelete = 0
     </update>
 
     <select id="getTeamIdListByUserId" parameterType="java.lang.Long" resultType="java.lang.Long">
         select id from team
-        where json_contains(currentMember,json_array(#{userId}))
+        where json_contains(currentMember,json_array(#{userId})) and isDelete = 0
     </select>
 
     <update id="joinTeam">
         update team set currentMember = json_array_append(currentMember,'$',#{userId}),
                         historyMember = json_array_append(historyMember,'$',#{userId})
-                    where id = #{teamId};
+                    where id = #{teamId} and isDelete = 0
     </update>
 
     <select id="getCurrentTeamLeaderId" parameterType="java.lang.Long" resultType="java.lang.Long">
         select json_unquote(json_extract(historyLeader,concat('$[',json_length(historyLeader)-1,']'))) from team
-        where id = #{teamId}
+        where id = #{teamId} and isDelete = 0
     </select>
 
     <update id="updateTeam">
@@ -159,13 +160,19 @@
             <if test="teamDTO.tags != null">tags = #{teamDTO.tags},</if>
             <if test="teamDTO.avatarUrl != null">avatarUrl = #{teamDTO.avatarUrl},</if>
         </set>
-        where id = #{teamId};
+        where id = #{teamId} and isDelete = 0
     </update>
 
     <update id="deleteTeam" parameterType="java.lang.Long">
         update team
         set isDelete = 1,deleteTime = now()
         where id = #{teamId}
+    </update>
+
+    <update id="changeLeader">
+        update team
+        set historyLeader = json_array_append(historyLeader,'$',#{futureLeaderId})
+        where id = #{teamId} and isDelete = 0
     </update>
 
     <!-- 自定义结果映射 -->

@@ -307,4 +307,21 @@ public class UserController {
         }
         return ResultUtils.success(userService.deleteTeam(request,teamId));
     }
+
+    /**
+     * 转让队长
+     * @param request
+     * @param teamId
+     * @param futureLeaderId
+     * @return
+     */
+    @GetMapping("/changeLeader")
+    @ApiOperation("转让队长")
+    public BaseResponse<Boolean> changeLeader(HttpServletRequest request, @RequestParam Long teamId,
+                                              @RequestParam Long futureLeaderId){
+        if (teamId == null || futureLeaderId == null) {
+            ResultUtils.error(ReturnType.StringType,ErrorCode.NULL_ERROR);
+        }
+        return ResultUtils.success(userService.changeLeader(request,teamId,futureLeaderId));
+    }
 }
