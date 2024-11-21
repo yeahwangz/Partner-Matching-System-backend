@@ -146,6 +146,22 @@
                     where id = #{teamId};
     </update>
 
+    <select id="getCurrentTeamLeaderId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select json_unquote(json_extract(historyLeader,concat('$[',json_length(historyLeader)-1,']'))) from team
+        where id = #{teamId}
+    </select>
+
+    <update id="updateTeam">
+        update team 
+        <set>
+            <if test="teamDTO.teamName != null">teamName = #{teamDTO.teamName},</if>
+            <if test="teamDTO.profile != null">profile = #{teamDTO.profile},</if>
+            <if test="teamDTO.tags != null">tags = #{teamDTO.tags},</if>
+            <if test="teamDTO.avatarUrl != null">avatarUrl = #{teamDTO.avatarUrl},</if>
+        </set>
+        where id = #{teamId};
+    </update>
+
     <!-- 自定义结果映射 -->
     <resultMap id="userResultMap" type="com.geek01.yupaoBackend.domain.po.UserSimilarPO">
         <result property="userId" column="userId"/>

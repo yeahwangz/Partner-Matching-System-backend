@@ -188,10 +188,8 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
     @Transactional
     @Override
     public User editUserInfoByCookie(HttpServletRequest request, User newUserInfo) {
-        User oldUserInfo = (User) request.getSession().getAttribute(UserConstant.USER_LOGIN_INFO);
-        Long id = oldUserInfo.getId();
         //用户id和用户想要修改的id不同，越权
-        if ( newUserInfo.getId() == null || !newUserInfo.getId().equals(id) ){
+        if ( newUserInfo.getId() == null || !newUserInfo.getId().equals(getLoginUserId(request)) ){
             throw new ErrorException(ErrorCode.NO_AUTH);
         }
         userMapper.editUserInfoByCookie(newUserInfo);
@@ -221,9 +219,8 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
     public String uploadUserImage(HttpServletRequest httpServletRequest, MultipartFile file) {
         try {
             String imageUrl = aliOSSUtils.upload(file);
-            User user =(User) httpServletRequest.getSession().getAttribute(UserConstant.USER_LOGIN_INFO);
             User userToSql = new User();
-            userToSql.setId(user.getId());
+            userToSql.setId(getLoginUserId(httpServletRequest));
             userToSql.setAvatarUrl(imageUrl);
             userMapper.updateAvatarUrlByUser(userToSql);
             return imageUrl;
@@ -324,11 +321,9 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
      */
     @Override
     public TeamVO createNewTeam(HttpServletRequest request, TeamDTO teamDTO) {
-        User loginUser = (User) request.getSession().getAttribute(USER_LOGIN_INFO);
-        Long userId = loginUser.getId();
         TeamPO teamPO = new TeamPO();
         List<Long> memberAndLeader = new ArrayList<>();
-        memberAndLeader.add(userId);
+        memberAndLeader.add(getLoginUserId(request));
         String memberAndLeaderString = memberAndLeader.toString();
         teamPO.setCurrentMember(memberAndLeaderString);
         teamPO.setHistoryMember(memberAndLeaderString);
@@ -475,12 +470,43 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
      */
     @Override
     public Boolean joinTeam(HttpServletRequest request, Long teamId) {
-        User loginUser = (User) request.getSession().getAttribute(USER_LOGIN_INFO);
-        Long userId = loginUser.getId();
-        userMapper.joinTeam(userId,teamId);
+        userMapper.joinTeam(getLoginUserId(request),teamId);
         return true;
     }
 
+    /**
+     * 修改队伍
+     * @param request
+     * @param teamDTO
+     * @return
+     */
+    @Override
+    public Boolean updateTeam(HttpServletRequest request, TeamDTO teamDTO) {
+        Long loginUserId = getLoginUserId(request);
+        Long teamId = teamDTO.getId();
+        if (teamId == null || teamId <= 0) {
+            throw new RuntimeException("传入待更新队伍信息有误");
+        }
+        Long currentTeamLeaderId = userMapper.getCurrentTeamLeaderId(teamId);
+        if (currentTeamLeaderId == null) {
+            throw new RuntimeException("数据库中没有对应队伍的队长");
+        }
+        if (!currentTeamLeaderId.equals(loginUserId)) {
+            throw new RuntimeException("越权");
+        }
+        userMapper.updateTeam(teamId,teamDTO);
+        return true;
+    }
+
+    /**
+     * 获取登录用户id
+     * @param request
+     * @return
+     */
+    private Long getLoginUserId(HttpServletRequest request) {
+        User loginUser = (User) request.getSession().getAttribute(USER_LOGIN_INFO);
+        return loginUser.getId();
+    }
 
     /**
      * 处理得到安全的队伍信息

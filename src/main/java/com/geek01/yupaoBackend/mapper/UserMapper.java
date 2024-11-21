@@ -1,6 +1,7 @@
 package com.geek01.yupaoBackend.mapper;
 
 import com.geek01.yupaoBackend.domain.User;
+import com.geek01.yupaoBackend.domain.dto.TeamDTO;
 import com.geek01.yupaoBackend.domain.po.TeamPO;
 import com.geek01.yupaoBackend.domain.po.TeamSimilarPO;
 import com.geek01.yupaoBackend.domain.po.UserSimilarPO;
@@ -149,5 +150,17 @@ public interface UserMapper /*mp用法 extends BaseMapper<User>*/ {
      */
     void joinTeam(@Param("userId") Long userId,@Param("teamId") Long teamId);
 
+    /**
+     * 获取当前队伍队长id
+     * @param teamId
+     * @return
+     */
+    Long getCurrentTeamLeaderId(Long teamId);
 
+    /**
+     * 修改队伍
+     * @param teamId
+     * @param teamDTO
+     */
+    void updateTeam(@Param("teamId") Long teamId,@Param("teamDTO") TeamDTO teamDTO);
 }

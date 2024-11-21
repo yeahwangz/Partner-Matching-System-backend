@@ -10,7 +10,6 @@ import com.geek01.yupaoBackend.domain.dto.UserLoginDTO;
 import com.geek01.yupaoBackend.domain.dto.UserRegisterDTO;
 import com.geek01.yupaoBackend.domain.vo.TeamVO;
 import com.geek01.yupaoBackend.domain.vo.UserToRecommendVO;
-import com.geek01.yupaoBackend.mapper.UserMapper;
 import com.geek01.yupaoBackend.service.UserService;
 import com.geek01.yupaoBackend.utils.ResultUtils;
 import com.github.xiaoymin.knife4j.core.util.CollectionUtils;
@@ -19,7 +18,6 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jettison.json.JSONString;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -278,5 +276,20 @@ public class UserController {
             ResultUtils.error(ReturnType.StringType,ErrorCode.NULL_ERROR);
         }
         return ResultUtils.success(userService.joinTeam(request,teamId));
+    }
+
+    /**
+     * 修改队伍
+     * @param request
+     * @param teamDTO
+     * @return
+     */
+    @PostMapping("/updateTeam")
+    @ApiOperation("修改队伍")
+    public BaseResponse<Boolean> updateTeam(HttpServletRequest request, @RequestBody TeamDTO teamDTO){
+        if (teamDTO == null) {
+            ResultUtils.error(ReturnType.StringType,ErrorCode.NULL_ERROR);
+        }
+        return ResultUtils.success(userService.updateTeam(request,teamDTO));
     }
 }
