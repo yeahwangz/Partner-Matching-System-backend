@@ -156,4 +156,12 @@ public interface UserService /*extends IService<User>*/ {
      * @return
      */
     Boolean updateTeam(HttpServletRequest request, TeamDTO teamDTO);
+
+    /**
+     * 删除队伍
+     * @param request
+     * @param teamId
+     * @return
+     */
+    Boolean deleteTeam(HttpServletRequest request, Long teamId);
 }

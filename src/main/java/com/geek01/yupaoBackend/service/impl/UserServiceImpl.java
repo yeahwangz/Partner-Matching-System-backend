@@ -499,6 +499,23 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
     }
 
     /**
+     * 删除队伍
+     * @param request
+     * @param teamId
+     * @return
+     */
+    @Override
+    public Boolean deleteTeam(HttpServletRequest request, Long teamId) {
+        Long loginUserId = getLoginUserId(request);
+        Long currentTeamLeaderId = userMapper.getCurrentTeamLeaderId(teamId);
+        if (!currentTeamLeaderId.equals(loginUserId)) {
+            throw new RuntimeException("越权");
+        }
+        userMapper.deleteTeam(teamId);
+        return true;
+    }
+
+    /**
      * 获取登录用户id
      * @param request
      * @return

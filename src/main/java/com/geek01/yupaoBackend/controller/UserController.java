@@ -292,4 +292,19 @@ public class UserController {
         }
         return ResultUtils.success(userService.updateTeam(request,teamDTO));
     }
+
+    /**
+     * 删除队伍
+     * @param request
+     * @param teamId
+     * @return
+     */
+    @GetMapping("/deleteTeam")
+    @ApiOperation("删除队伍")
+    public BaseResponse<Boolean> deleteTeam(HttpServletRequest request, @RequestParam Long teamId){
+        if (teamId == null) {
+            ResultUtils.error(ReturnType.StringType,ErrorCode.NULL_ERROR);
+        }
+        return ResultUtils.success(userService.deleteTeam(request,teamId));
+    }
 }

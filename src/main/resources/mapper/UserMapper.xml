@@ -118,7 +118,7 @@
     <select id="selectTeamsHaveTagsByCursor" resultMap="teamResultMap" parameterType="java.lang.Long">
         select *
         from team_tag_forsearch
-        where tags IS NOT NULL and teamId != #{id}
+        where isDelete = 0 and tags IS NOT NULL and teamId != #{id}
     </select>
 
     <select id="getTeamVO" parameterType="java.util.List"
@@ -160,6 +160,12 @@
             <if test="teamDTO.avatarUrl != null">avatarUrl = #{teamDTO.avatarUrl},</if>
         </set>
         where id = #{teamId};
+    </update>
+
+    <update id="deleteTeam" parameterType="java.lang.Long">
+        update team
+        set isDelete = 1,deleteTime = now()
+        where id = #{teamId}
     </update>
 
     <!-- 自定义结果映射 -->

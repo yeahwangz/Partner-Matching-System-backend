@@ -163,4 +163,10 @@ public interface UserMapper /*mp用法 extends BaseMapper<User>*/ {
      * @param teamDTO
      */
     void updateTeam(@Param("teamId") Long teamId,@Param("teamDTO") TeamDTO teamDTO);
+
+    /**
+     * 删除队伍
+     * @param teamId
+     */
+    void deleteTeam(Long teamId);
 }
