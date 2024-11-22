@@ -176,4 +176,11 @@ public interface UserMapper /*mp用法 extends BaseMapper<User>*/ {
      * @param futureLeaderId
      */
     void changeLeader(@Param("teamId") Long teamId, @Param("futureLeaderId") Long futureLeaderId);
+
+    /**
+     * 从队伍中删除指定用户
+     * @param teamId
+     * @param loginUserId
+     */
+    void deleteUserFromTeam(@Param("teamId") Long teamId, @Param("loginUserId") Long loginUserId);
 }

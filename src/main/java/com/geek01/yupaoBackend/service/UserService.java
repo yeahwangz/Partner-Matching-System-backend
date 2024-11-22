@@ -173,4 +173,21 @@ public interface UserService /*extends IService<User>*/ {
      * @return
      */
     Boolean changeLeader(HttpServletRequest request, Long teamId, Long futureLeaderId);
+
+    /**
+     * 普通成员退出队伍
+     * @param request
+     * @param teamId
+     * @return
+     */
+    Boolean normalMemberExitTeam(HttpServletRequest request, Long teamId);
+
+    /**
+     * 队长退出队伍
+     * @param request
+     * @param teamId
+     * @param futureLeaderId
+     * @return
+     */
+    Boolean leaderExitTeam(HttpServletRequest request, Long teamId, Long futureLeaderId);
 }

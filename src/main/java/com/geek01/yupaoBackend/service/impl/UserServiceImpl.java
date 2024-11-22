@@ -538,6 +538,39 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
     }
 
     /**
+     * 普通成员退出队伍
+     * @param request
+     * @param teamId
+     * @return
+     */
+    @Override
+    public Boolean normalMemberExitTeam(HttpServletRequest request, Long teamId) {
+        Long loginUserId = getLoginUserId(request);
+        List<Long> teamIdListByUserId = userMapper.getTeamIdListByUserId(loginUserId);
+        if (!teamIdListByUserId.contains(teamId)) {
+            throw new RuntimeException("登录用户不在队伍里");
+        }
+        userMapper.deleteUserFromTeam(teamId,loginUserId);
+        return true;
+    }
+
+    /**
+     * 队长退出队伍
+     * @param request
+     * @param teamId
+     * @param futureLeaderId
+     * @return
+     */
+    @Transactional
+    @Override
+    public Boolean leaderExitTeam(HttpServletRequest request, Long teamId, Long futureLeaderId) {
+        this.changeLeader(request, teamId, futureLeaderId);
+        Long loginUserId = this.getLoginUserId(request);
+        userMapper.deleteUserFromTeam(teamId,loginUserId);
+        return true;
+    }
+
+    /**
      * 获取登录用户id
      * @param request
      * @return

@@ -319,9 +319,40 @@ public class UserController {
     @ApiOperation("转让队长")
     public BaseResponse<Boolean> changeLeader(HttpServletRequest request, @RequestParam Long teamId,
                                               @RequestParam Long futureLeaderId){
-        if (teamId == null || futureLeaderId == null) {
+        if (teamId == null || teamId <= 0 || futureLeaderId == null || futureLeaderId <= 0) {
             ResultUtils.error(ReturnType.StringType,ErrorCode.NULL_ERROR);
         }
         return ResultUtils.success(userService.changeLeader(request,teamId,futureLeaderId));
+    }
+
+    /**
+     * 普通成员退出队伍
+     * @param request
+     * @param teamId
+     * @return
+     */
+    @GetMapping("/normalMemberExitTeam")
+    @ApiOperation("普通成员退出队伍")
+    public BaseResponse<Boolean> normalMemberExitTeam(HttpServletRequest request, @RequestParam Long teamId){
+        if (teamId == null || teamId <= 0) {
+            ResultUtils.error(ReturnType.StringType,ErrorCode.NULL_ERROR);
+        }
+        return ResultUtils.success(userService.normalMemberExitTeam(request,teamId));
+    }
+
+    /**
+     * 队长退出队伍
+     * @param request
+     * @param teamId
+     * @return
+     */
+    @GetMapping("/leaderExitTeam")
+    @ApiOperation("队长退出队伍")
+    public BaseResponse<Boolean> leaderExitTeam(HttpServletRequest request, @RequestParam Long teamId,
+                                                @RequestParam Long futureLeaderId){
+        if (teamId == null || teamId <= 0 || futureLeaderId == null || futureLeaderId <= 0) {
+            ResultUtils.error(ReturnType.StringType,ErrorCode.NULL_ERROR);
+        }
+        return ResultUtils.success(userService.leaderExitTeam(request,teamId,futureLeaderId));
     }
 }
