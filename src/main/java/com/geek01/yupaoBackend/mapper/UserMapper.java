@@ -178,9 +178,24 @@ public interface UserMapper /*mp用法 extends BaseMapper<User>*/ {
     void changeLeader(@Param("teamId") Long teamId, @Param("futureLeaderId") Long futureLeaderId);
 
     /**
-     * 从队伍中删除指定用户
+     * 获取指定队伍当前成员json字符串数组
      * @param teamId
-     * @param loginUserId
+     * @return
      */
-    void deleteUserFromTeam(@Param("teamId") Long teamId, @Param("loginUserId") Long loginUserId);
+    String getTeamCurrentMemberJson(Long teamId);
+
+    /**
+     * 更新指定队伍的当前成员json数据
+     * @param teamId
+     * @param newCurrentMemberJson
+     */
+    void updateTeamCurrentMember(@Param("teamId") Long teamId,
+                                 @Param("newCurrentMemberJson") String newCurrentMemberJson);
+
+    /**
+     * 获取指定队伍当前成员个数
+     * @param teamId
+     * @return
+     */
+    Integer getTeamCurrentMemberNum(Long teamId);
 }

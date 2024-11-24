@@ -14,6 +14,8 @@ import com.geek01.yupaoBackend.exception.ErrorException;
 import com.geek01.yupaoBackend.mapper.UserMapper;
 import com.geek01.yupaoBackend.service.UserService;
 import com.geek01.yupaoBackend.utils.AliOSSUtils;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.cursor.Cursor;
@@ -25,6 +27,7 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -550,7 +553,11 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
         if (!teamIdListByUserId.contains(teamId)) {
             throw new RuntimeException("登录用户不在队伍里");
         }
-        userMapper.deleteUserFromTeam(teamId,loginUserId);
+        Long currentTeamLeaderId = userMapper.getCurrentTeamLeaderId(teamId);
+        if (currentTeamLeaderId.equals(loginUserId)) {
+            throw new RuntimeException("想要删除的是队长，不是普通成员");
+        }
+        this.deleteUserFromTeam(teamId,loginUserId);
         return true;
     }
 
@@ -564,9 +571,14 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
     @Transactional
     @Override
     public Boolean leaderExitTeam(HttpServletRequest request, Long teamId, Long futureLeaderId) {
+        Integer teamCurrentMemberNum = userMapper.getTeamCurrentMemberNum(teamId);
+        if (teamCurrentMemberNum == 1) {
+            this.deleteTeam(request, teamId);
+            return true;
+        }
         this.changeLeader(request, teamId, futureLeaderId);
         Long loginUserId = this.getLoginUserId(request);
-        userMapper.deleteUserFromTeam(teamId,loginUserId);
+        this.deleteUserFromTeam(teamId,loginUserId);
         return true;
     }
 
@@ -595,6 +607,23 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
         safetyTeamVO.setCurrentMember(team.getCurrentMember());
         safetyTeamVO.setMaxMemberNum(team.getMaxMemberNum());
         return safetyTeamVO;
+    }
+
+    /**
+     * 从指定队伍中删除指定成员
+     * @param teamId
+     * @param loginUserId
+     */
+    private void deleteUserFromTeam(Long teamId, Long loginUserId) {
+        String teamCurrentMemberJson = userMapper.getTeamCurrentMemberJson(teamId);
+        Gson gson = new Gson();
+        //定义目标类型
+        Type listType = new TypeToken<List<Long>>() {}.getType();
+        // 解析 JSON 字符串为 List<Long>
+        List<Long> currentMembers = gson.fromJson(teamCurrentMemberJson, listType);
+        currentMembers.remove(loginUserId);
+        String newCurrentMemberJson = gson.toJson(currentMembers);
+        userMapper.updateTeamCurrentMember(teamId,newCurrentMemberJson);
     }
 
 }

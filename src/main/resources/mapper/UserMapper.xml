@@ -175,12 +175,21 @@
         where id = #{teamId} and isDelete = 0
     </update>
 
-    <update id="deleteUserFromTeam" parameterType="java.lang.Long">
+    <select id="getTeamCurrentMemberJson" parameterType="java.lang.Long" resultType="java.lang.String">
+        select currentMember from team
+        where id = #{teamId}
+    </select>
+
+    <update id="updateTeamCurrentMember">
         update team
-        set currentMember = json_remove(currentMember,
-                                        json_unquote(json_search(currentMember,'one',cast(#{loginUserId} as char))))
-        where id = #{teamId} and isDelete = 0
+        set currentMember = #{newCurrentMemberJson}
+        where id = #{teamId}
     </update>
+
+    <select id="getTeamCurrentMemberNum" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        select json_length(currentMember) from team
+        where id = #{teamId}
+    </select>
 
     <!-- 自定义结果映射 -->
     <resultMap id="userResultMap" type="com.geek01.yupaoBackend.domain.po.UserSimilarPO">
