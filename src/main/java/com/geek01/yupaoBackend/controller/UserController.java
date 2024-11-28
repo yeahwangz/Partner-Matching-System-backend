@@ -16,6 +16,7 @@ import com.github.xiaoymin.knife4j.core.util.CollectionUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
@@ -207,27 +208,28 @@ public class UserController {
      */
     @GetMapping("/recommend/normalTeamPageNum")
     @ApiOperation("计算数据库中前端team, n条数据一页共可以显示m页，返回m")
-    public BaseResponse<Long> getNormalTeamPageNum(@RequestParam Integer everyPageSize){
+    public BaseResponse<Long> getNormalTeamPageNum(HttpServletRequest httpServletRequest, @RequestParam Integer everyPageSize){
         if (everyPageSize < 1) {
             return ResultUtils.error(ErrorCode.PARAMS_ERROR,1L);
         }
-        return ResultUtils.success(userService.getNormalTeamPageNum(everyPageSize));
+        return ResultUtils.success(userService.getNormalTeamPageNum(httpServletRequest,everyPageSize));
     }
 
     /**
      * 根据前端发送的页码数和每页数据量获取该页的team
+     * @param httpServletRequest
      * @param nowPage
      * @param everyPageSize
      * @return
      */
     @GetMapping("/recommend/normalTeamOnePage")
     @ApiOperation("根据前端发送的页码数和每页数据量获取该页的team")
-    public BaseResponse<List<TeamVO>> getNormalTeamOnePage(@RequestParam Long nowPage
+    public BaseResponse<List<TeamVO>> getNormalTeamOnePage(HttpServletRequest httpServletRequest, @RequestParam Long nowPage
             ,@RequestParam Integer everyPageSize){
         if ( nowPage < 1 || everyPageSize < 1) {
             return ResultUtils.error(ErrorCode.PARAMS_ERROR,new ArrayList<>());
         }
-        return ResultUtils.success(userService.getNormalTeamOnePage(nowPage,everyPageSize));
+        return ResultUtils.success(userService.getNormalTeamOnePage(httpServletRequest,nowPage,everyPageSize));
     }
 
     /**
@@ -348,11 +350,44 @@ public class UserController {
      */
     @GetMapping("/leaderExitTeam")
     @ApiOperation("队长退出队伍")
-    public BaseResponse<Boolean> leaderExitTeam(HttpServletRequest request, @RequestParam Long teamId,
-                                                @RequestParam Long futureLeaderId){
-        if (teamId == null || teamId <= 0 || futureLeaderId == null || futureLeaderId <= 0) {
+    public BaseResponse<Boolean> leaderExitTeam(HttpServletRequest request, @RequestParam Long teamId){
+        if (teamId == null || teamId <= 0 ) {
             ResultUtils.error(ReturnType.StringType,ErrorCode.NULL_ERROR);
         }
-        return ResultUtils.success(userService.leaderExitTeam(request,teamId,futureLeaderId));
+        return ResultUtils.success(userService.leaderExitTeam(request,teamId));
+    }
+
+    /**
+     * 获取当前用户担任队长的队伍
+     * @param httpServletRequest
+     * @param nowPage
+     * @param everyPageSize
+     * @return
+     */
+    @GetMapping("/myTeamWithLeaderOnePage")
+    @ApiOperation("获取当前用户担任队长的队伍")
+    public BaseResponse<List<TeamVO>> getMyTeamWithLeaderOnePage(HttpServletRequest httpServletRequest
+            , @RequestParam("nowPage") Long nowPage,@RequestParam("everyPageSize") Integer everyPageSize){
+        if ( nowPage < 1 || everyPageSize < 1) {
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR,new ArrayList<>());
+        }
+        return ResultUtils.success(userService.getMyTeamWithLeaderOnePage(httpServletRequest
+                ,nowPage,everyPageSize));
+    }
+
+    /**
+     * 计算数据库中前端当前用户担任队长的队伍, n条数据一页共可以显示m页，返回m
+     * @param httpServletRequest
+     * @param everyPageSize
+     * @return
+     */
+    @GetMapping("/myTeamWithLeaderPageNum")
+    @ApiOperation("计算数据库中前端当前用户担任队长的队伍, n条数据一页共可以显示m页，返回m")
+    public BaseResponse<Long> getMyTeamWithLeaderPageNum(HttpServletRequest httpServletRequest
+            , @RequestParam Integer everyPageSize){
+        if (everyPageSize < 1) {
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR,1L);
+        }
+        return ResultUtils.success(userService.getMyTeamWithLeaderPageNum(httpServletRequest,everyPageSize));
     }
 }

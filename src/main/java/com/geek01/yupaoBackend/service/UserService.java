@@ -106,18 +106,20 @@ public interface UserService /*extends IService<User>*/ {
 
     /**
      * 计算数据库中前端team，n条数据一页共可以显示m页，返回m
+     * @param httpServletRequest
      * @param everyPageSize
      * @return
      */
-    Long getNormalTeamPageNum(Integer everyPageSize);
+    Long getNormalTeamPageNum(HttpServletRequest httpServletRequest,Integer everyPageSize);
 
     /**
      * 根据前端发送的页码数和每页数据量获取该页的team
+     * @param httpServletRequest
      * @param nowPage
      * @param everyPageSize
      * @return
      */
-    List<TeamVO> getNormalTeamOnePage(Long nowPage, Integer everyPageSize);
+    List<TeamVO> getNormalTeamOnePage(HttpServletRequest httpServletRequest,Long nowPage, Integer everyPageSize);
 
     /**
      * 根据队伍的标签进行用户推荐 选取前100条最匹配的
@@ -186,8 +188,25 @@ public interface UserService /*extends IService<User>*/ {
      * 队长退出队伍
      * @param request
      * @param teamId
-     * @param futureLeaderId
      * @return
      */
-    Boolean leaderExitTeam(HttpServletRequest request, Long teamId, Long futureLeaderId);
+    Boolean leaderExitTeam(HttpServletRequest request, Long teamId);
+
+    /**
+     * 获取当前用户担任队长的队伍
+     * @param httpServletRequest
+     * @param nowPage
+     * @param everyPageSize
+     * @return
+     */
+    List<TeamVO> getMyTeamWithLeaderOnePage(HttpServletRequest httpServletRequest, Long nowPage,
+                                            Integer everyPageSize);
+
+    /**
+     * 计算数据库中前端当前用户担任队长的队伍, n条数据一页共可以显示m页，返回m
+     * @param httpServletRequest
+     * @param everyPageSize
+     * @return
+     */
+    Long getMyTeamWithLeaderPageNum(HttpServletRequest httpServletRequest, Integer everyPageSize);
 }

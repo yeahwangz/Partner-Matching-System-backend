@@ -2,7 +2,6 @@ package com.geek01.yupaoBackend.service.impl;
 
 import com.geek01.yupaoBackend.algorithm.LevenshteinDistance;
 import com.geek01.yupaoBackend.common.ErrorCode;
-import com.geek01.yupaoBackend.constant.UserConstant;
 import com.geek01.yupaoBackend.domain.User;
 import com.geek01.yupaoBackend.domain.dto.TeamDTO;
 import com.geek01.yupaoBackend.domain.po.TeamPO;
@@ -207,7 +206,7 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
      */
     @Override
     public User getSaftyUserInfoByCookie(HttpServletRequest request) {
-        User user = (User) request.getSession().getAttribute(UserConstant.USER_LOGIN_INFO);
+        User user = (User) request.getSession().getAttribute(USER_LOGIN_INFO);
         return getSafetyUser(user);
     }
 
@@ -283,6 +282,10 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
         for (int i = 0; i < userSimilarPOList.size(); i++) {
             map.put(userSimilarPOList.get(i).getUserId(), i);
         }
+        //如果心动模式没有匹配的用户，那就返回空列表
+        if (userSimilarPOList.isEmpty()) {
+            return new ArrayList<>();
+        }
         List<UserToRecommendVO> userToRecommendVO = userMapper.getUserToRecommendVO(userSimilarPOList);
         userToRecommendVO.sort(Comparator.comparingInt(o -> map.get(o.getId())));
         return userToRecommendVO;
@@ -338,7 +341,7 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
         if (teamDTO.getProfile() != null && !teamDTO.getProfile().isBlank()) {
             teamPO.setProfile(teamDTO.getProfile());
         }
-        if (teamDTO.getProfile() != null && !teamDTO.getTags().isBlank()) {
+        if (teamDTO.getTags() != null && !teamDTO.getTags().isBlank()) {
             teamPO.setTags(teamDTO.getTags());
         }
         if (teamDTO.getAvatarUrl() != null) {
@@ -352,25 +355,31 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
 
     /**
      * 计算数据库中前端team，n条数据一页共可以显示m页，返回m
+     * @param httpServletRequest
      * @param everyPageSize
      * @return
      */
     @Override
-    public Long getNormalTeamPageNum(Integer everyPageSize) {
-        Long allTeamNum = userMapper.getAllTeamNum();
-        return (allTeamNum - 1)/everyPageSize + ((allTeamNum - 1) % everyPageSize == 0 ? 0:1);
+    public Long getNormalTeamPageNum(HttpServletRequest httpServletRequest,Integer everyPageSize) {
+        Long loginUserId = this.getLoginUserId(httpServletRequest);
+        Long allTeamNumWithoutLoginUser = userMapper.getAllTeamNumWithoutLoginUser(loginUserId);
+        return (allTeamNumWithoutLoginUser - 1)/everyPageSize
+                + ((allTeamNumWithoutLoginUser - 1) % everyPageSize == 0 ? 0:1);
     }
 
     /**
      * 根据前端发送的页码数和每页数据量获取该页的team
+     * @param httpServletRequest
      * @param nowPage
      * @param everyPageSize
      * @return
      */
     @Override
-    public List<TeamVO> getNormalTeamOnePage(Long nowPage, Integer everyPageSize) {
+    public List<TeamVO> getNormalTeamOnePage(HttpServletRequest httpServletRequest
+            ,Long nowPage, Integer everyPageSize) {
         Long offset = (nowPage-1)*everyPageSize;
         Map<String,Object> params = new HashMap<>();
+        params.put("loginUserId",this.getLoginUserId(httpServletRequest));
         params.put("offset",offset);
         params.put("everyPageSize",everyPageSize);
         return userMapper.getNormalTeamOnePage(params);
@@ -381,10 +390,14 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
      * @param request
      * @return
      */
+    @Transactional
     @Override
     public List<TeamVO> getRecommendTeamList(HttpServletRequest request) {
         User LoginUser = (User) request.getSession().getAttribute(USER_LOGIN_INFO);
         String tags = LoginUser.getTags();
+        if (tags == null) {
+            tags = "";
+        }
         // 最大容量
         int maxCapacity = 100;
         List<TeamSimilarPO> teamSimilarPOList = new ArrayList<>();
@@ -392,19 +405,12 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
         try {
             //获取到指定mapper
             UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-            TeamPO teamById = userMapper.getTeamById(LoginUser.getId());
-            Long teamId;
-            if (teamById != null) {
-                teamId = teamById.getId();
-            }
-            teamId = -1L;
             //调用指定mapper的方法，返回一个cursor
-            Cursor<TeamSimilarPO> cursor = mapper.selectTeamsHaveTagsByCursor(teamId);
+            List<Long> teamIdListByUserId = userMapper.getTeamIdListByUserId(LoginUser.getId());
+            Cursor<TeamSimilarPO> cursor = mapper.selectTeamsHaveTagsByCursor(teamIdListByUserId);
             //查询数据总量
-            //Integer total = mapper.queryCountUsersHaveTags();
             //定义一个list，用来从cursor中读取数据，每读取够1000条的时候，开始处理这批数据；
             //当前批数据处理完之后，清空list，准备接收下一批次数据；直到大量的数据全部处理完；
-            //List<User> userList = new ArrayList<>();
             if (cursor != null) {
                 for (TeamSimilarPO teamSimilarPO : cursor) {
                     Long distance = levenshteinDistance.getDistance(tags, teamSimilarPO.getTags());
@@ -418,8 +424,9 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
                 }
             }
             sqlSession.commit();
-        }catch (Exception e){
-            System.out.println("PriorityQueue<TeamSimilarPO>获取失败：" + e);
+        }catch (Exception
+                e){
+            System.out.println("PriorityQueue<UserSimilarPO>获取失败：" + e);
             sqlSession.rollback();
         }
         finally {
@@ -432,9 +439,13 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
         for (int i = 0; i < teamSimilarPOList.size(); i++) {
             map.put(teamSimilarPOList.get(i).getTeamId(), i);
         }
-        List<TeamVO> teamVO = userMapper.getTeamVO(teamSimilarPOList);
-        teamVO.sort(Comparator.comparingInt(o -> map.get(o.getId())));
-        return teamVO;
+        //如果心动模式没有匹配的用户，那就返回空列表
+        if (teamSimilarPOList.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<TeamVO> teamVOS = userMapper.getTeamVO(teamSimilarPOList);
+        teamVOS.sort(Comparator.comparingInt(o -> map.get(o.getId())));
+        return teamVOS;
     }
 
     /**
@@ -473,6 +484,9 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
      */
     @Override
     public Boolean joinTeam(HttpServletRequest request, Long teamId) {
+        if (userMapper.getTeamCurrentMemberNum(teamId) == 5){
+            throw new RuntimeException("超出允许加入人数上限");
+        }
         userMapper.joinTeam(getLoginUserId(request),teamId);
         return true;
     }
@@ -565,21 +579,85 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
      * 队长退出队伍
      * @param request
      * @param teamId
-     * @param futureLeaderId
      * @return
      */
     @Transactional
     @Override
-    public Boolean leaderExitTeam(HttpServletRequest request, Long teamId, Long futureLeaderId) {
+    public Boolean leaderExitTeam(HttpServletRequest request, Long teamId) {
+        Long loginUserId = this.getLoginUserId(request);
+        Long currentTeamLeaderId = userMapper.getCurrentTeamLeaderId(teamId);
+        if (!currentTeamLeaderId.equals(loginUserId)) {
+            throw new RuntimeException("越权！");
+        }
         Integer teamCurrentMemberNum = userMapper.getTeamCurrentMemberNum(teamId);
         if (teamCurrentMemberNum == 1) {
             this.deleteTeam(request, teamId);
             return true;
         }
+        String teamCurrentMemberJson = userMapper.getTeamCurrentMemberJson(teamId);
+        Gson gson = new Gson();
+        //定义目标类型
+        Type listType = new TypeToken<List<Long>>() {}.getType();
+        // 解析 JSON 字符串为 List<Long>
+        List<Long> currentMembers = gson.fromJson(teamCurrentMemberJson, listType);
+        long futureLeaderId = 0L;
+        for (Long memberId : currentMembers) {
+            if (!memberId.equals(loginUserId)) {
+                futureLeaderId = memberId;
+                break;
+            }
+        }
         this.changeLeader(request, teamId, futureLeaderId);
-        Long loginUserId = this.getLoginUserId(request);
         this.deleteUserFromTeam(teamId,loginUserId);
         return true;
+    }
+
+    /**
+     * 获取当前用户担任队长的队伍
+     * @param httpServletRequest
+     * @param nowPage
+     * @param everyPageSize
+     * @return
+     */
+    @Override
+    public List<TeamVO> getMyTeamWithLeaderOnePage(HttpServletRequest httpServletRequest,
+                                                   Long nowPage, Integer everyPageSize) {
+        Long loginUserId = this.getLoginUserId(httpServletRequest);
+        List<TeamPO> teamPOList = userMapper.getMyTeamWithLeaderOnePage(loginUserId);
+        if (teamPOList.isEmpty()){
+            return new ArrayList<>();
+        }
+        int teamPOListNum = teamPOList.size();
+        long end;
+        if (teamPOListNum % everyPageSize == 0) {
+            end = nowPage*everyPageSize;
+        }else {
+            if (nowPage == teamPOListNum/everyPageSize + 1) {
+                end = teamPOListNum;
+            }else {
+                end = nowPage*everyPageSize;
+            }
+        }
+        List<TeamVO> safetyTeamVOList = new ArrayList<>();
+        for (long i = (nowPage-1)*everyPageSize ; i < end; i++) {
+            safetyTeamVOList.add(this.getSafetyTeam(teamPOList.get((int) i)));
+        }
+        return safetyTeamVOList;
+    }
+
+    /**
+     * 计算数据库中前端当前用户担任队长的队伍, n条数据一页共可以显示m页，返回m
+     * @param httpServletRequest
+     * @param everyPageSize
+     * @return
+     */
+    @Override
+    public Long getMyTeamWithLeaderPageNum(HttpServletRequest httpServletRequest, Integer everyPageSize) {
+        Long loginUserId = this.getLoginUserId(httpServletRequest);
+        List<TeamPO> myTeamWithLeaderOnePage = userMapper.getMyTeamWithLeaderOnePage(loginUserId);
+        long allMyTeamWithLeaderNum = myTeamWithLeaderOnePage.size();
+        return (allMyTeamWithLeaderNum - 1)/everyPageSize
+                + ((allMyTeamWithLeaderNum - 1) % everyPageSize == 0 ? 0:1);
     }
 
     /**

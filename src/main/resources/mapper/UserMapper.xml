@@ -112,14 +112,17 @@
             resultType="com.geek01.yupaoBackend.domain.vo.TeamVO">
         select *
         from team
-        where isDelete = 0
+        where isDelete = 0 and !json_contains(currentMember,json_array(#{loginUserId}))
         limit #{everyPageSize} offset #{offset}
     </select>
 
-    <select id="selectTeamsHaveTagsByCursor" resultMap="teamResultMap" parameterType="java.lang.Long">
+    <select id="selectTeamsHaveTagsByCursor" resultMap="teamResultMap" parameterType="java.util.List">
         select *
         from team_tag_forsearch
-        where isDelete = 0 and tags IS NOT NULL and teamId != #{id}
+        where isDelete = 0 and tags IS NOT NULL and teamId not in
+        <foreach collection="list" item="teamId" separator="," open="(" close=")">
+            #{teamId}
+        </foreach>
     </select>
 
     <select id="getTeamVO" parameterType="java.util.List"
@@ -191,6 +194,18 @@
         where id = #{teamId}
     </select>
 
+    <select id="getMyTeamWithLeaderOnePage" parameterType="java.lang.Long"
+            resultType="com.geek01.yupaoBackend.domain.po.TeamPO">
+        select * from team
+        where JSON_EXTRACT(historyLeader, CONCAT('$[', JSON_LENGTH(historyLeader) - 1, ']'))
+                  = #{loginUserId} and isDelete = 0
+    </select>
+
+    <select id="getAllTeamNumWithoutLoginUser" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select count(*) from team
+        where isDelete = 0 and !json_contains(currentMember,json_array(#{loginUserId}))
+    </select>
+    
     <!-- 自定义结果映射 -->
     <resultMap id="userResultMap" type="com.geek01.yupaoBackend.domain.po.UserSimilarPO">
         <result property="userId" column="userId"/>

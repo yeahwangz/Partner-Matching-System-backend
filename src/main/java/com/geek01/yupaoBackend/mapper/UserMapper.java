@@ -116,11 +116,11 @@ public interface UserMapper /*mp用法 extends BaseMapper<User>*/ {
     List<TeamVO> getNormalTeamOnePage(Map<String, Object> params);
 
     /**
-     * 根据用户的标签进行用户推荐 选取前100条最匹配的
-     * @param id
+     * 根据用户的标签进行队伍推荐 选取前100条最匹配的
+     * @param teamIdList
      * @return
      */
-    Cursor<TeamSimilarPO> selectTeamsHaveTagsByCursor(Long id);
+    Cursor<TeamSimilarPO> selectTeamsHaveTagsByCursor(List<Long> teamIdList);
 
     /**
      * 获取最终推荐的<=maxCapacity个队伍信息
@@ -198,4 +198,18 @@ public interface UserMapper /*mp用法 extends BaseMapper<User>*/ {
      * @return
      */
     Integer getTeamCurrentMemberNum(Long teamId);
+
+    /**
+     * 获取当前用户担任队长的队伍
+     * @param loginUserId
+     * @return
+     */
+    List<TeamPO> getMyTeamWithLeaderOnePage(Long loginUserId);
+
+    /**
+     * 计算数据库中前端team，n条数据一页共可以显示m页，返回m
+     * @param loginUserId
+     * @return
+     */
+    Long getAllTeamNumWithoutLoginUser(Long loginUserId);
 }
