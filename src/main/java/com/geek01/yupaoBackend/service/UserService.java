@@ -209,4 +209,22 @@ public interface UserService /*extends IService<User>*/ {
      * @return
      */
     Long getMyTeamWithLeaderPageNum(HttpServletRequest httpServletRequest, Integer everyPageSize);
+
+    /**
+     * 获取当前用户是普通成员的队伍
+     * @param httpServletRequest
+     * @param nowPage
+     * @param everyPageSize
+     * @return
+     */
+    List<TeamVO> getMyTeamWithMemberOnePage(HttpServletRequest httpServletRequest,
+                                            Long nowPage, Integer everyPageSize);
+
+    /**
+     * 计算数据库中前端当前用户是普通成员的队伍, n条数据一页共可以显示m页，返回m
+     * @param httpServletRequest
+     * @param everyPageSize
+     * @return
+     */
+    Long getMyTeamWithMemberPageNum(HttpServletRequest httpServletRequest, Integer everyPageSize);
 }

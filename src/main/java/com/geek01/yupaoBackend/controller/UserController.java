@@ -390,4 +390,38 @@ public class UserController {
         }
         return ResultUtils.success(userService.getMyTeamWithLeaderPageNum(httpServletRequest,everyPageSize));
     }
+
+    /**
+     * 获取当前用户是普通成员的队伍
+     * @param httpServletRequest
+     * @param nowPage
+     * @param everyPageSize
+     * @return
+     */
+    @GetMapping("/myTeamWithMemberOnePage")
+    @ApiOperation("获取当前用户是普通成员的队伍")
+    public BaseResponse<List<TeamVO>> getMyTeamWithMemberOnePage(HttpServletRequest httpServletRequest
+            , @RequestParam("nowPage") Long nowPage,@RequestParam("everyPageSize") Integer everyPageSize){
+        if ( nowPage < 1 || everyPageSize < 1) {
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR,new ArrayList<>());
+        }
+        return ResultUtils.success(userService.getMyTeamWithMemberOnePage(httpServletRequest
+                ,nowPage,everyPageSize));
+    }
+
+    /**
+     * 计算数据库中前端当前用户是普通成员的队伍, n条数据一页共可以显示m页，返回m
+     * @param httpServletRequest
+     * @param everyPageSize
+     * @return
+     */
+    @GetMapping("/myTeamWithMemberPageNum")
+    @ApiOperation("计算数据库中前端当前用户是普通成员的队伍, n条数据一页共可以显示m页，返回m")
+    public BaseResponse<Long> getMyTeamWithMemberPageNum(HttpServletRequest httpServletRequest
+            , @RequestParam Integer everyPageSize){
+        if (everyPageSize < 1) {
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR,1L);
+        }
+        return ResultUtils.success(userService.getMyTeamWithMemberPageNum(httpServletRequest,everyPageSize));
+    }
 }

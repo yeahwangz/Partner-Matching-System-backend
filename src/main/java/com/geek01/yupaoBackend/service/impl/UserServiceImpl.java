@@ -624,6 +624,62 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
                                                    Long nowPage, Integer everyPageSize) {
         Long loginUserId = this.getLoginUserId(httpServletRequest);
         List<TeamPO> teamPOList = userMapper.getMyTeamWithLeaderOnePage(loginUserId);
+        return getMyTeamOnePage(nowPage, everyPageSize, teamPOList);
+    }
+
+    /**
+     * 计算数据库中前端当前用户担任队长的队伍, n条数据一页共可以显示m页，返回m
+     * @param httpServletRequest
+     * @param everyPageSize
+     * @return
+     */
+    @Override
+    public Long getMyTeamWithLeaderPageNum(HttpServletRequest httpServletRequest, Integer everyPageSize) {
+        Long loginUserId = this.getLoginUserId(httpServletRequest);
+        List<TeamPO> myTeamWithLeaderOnePage = userMapper.getMyTeamWithLeaderOnePage(loginUserId);
+        long allMyTeamWithLeaderNum = myTeamWithLeaderOnePage.size();
+        return (allMyTeamWithLeaderNum - 1)/everyPageSize
+                + ((allMyTeamWithLeaderNum - 1) % everyPageSize == 0 ? 0:1);
+    }
+
+    /**
+     * 获取当前用户是普通成员的队伍
+     * @param httpServletRequest
+     * @param nowPage
+     * @param everyPageSize
+     * @return
+     */
+    @Override
+    public List<TeamVO> getMyTeamWithMemberOnePage(HttpServletRequest httpServletRequest,
+                                                   Long nowPage, Integer everyPageSize) {
+        Long loginUserId = this.getLoginUserId(httpServletRequest);
+        List<TeamPO> teamPOList = userMapper.getMyTeamWithMemberOnePage(loginUserId);
+        return getMyTeamOnePage(nowPage, everyPageSize, teamPOList);
+    }
+
+    /**
+     * 计算数据库中前端当前用户是普通成员的队伍, n条数据一页共可以显示m页，返回m
+     * @param httpServletRequest
+     * @param everyPageSize
+     * @return
+     */
+    @Override
+    public Long getMyTeamWithMemberPageNum(HttpServletRequest httpServletRequest, Integer everyPageSize) {
+        Long loginUserId = this.getLoginUserId(httpServletRequest);
+        List<TeamPO> myTeamWithMemberOnePage = userMapper.getMyTeamWithMemberOnePage(loginUserId);
+        long allMyTeamWithMemberNum = myTeamWithMemberOnePage.size();
+        return (allMyTeamWithMemberNum - 1)/everyPageSize
+                + ((allMyTeamWithMemberNum - 1) % everyPageSize == 0 ? 0:1);
+    }
+
+    /**
+     * 提取获取用户担任成员或队长的队伍的公共代码
+     * @param nowPage
+     * @param everyPageSize
+     * @param teamPOList
+     * @return
+     */
+    private List<TeamVO> getMyTeamOnePage(Long nowPage, Integer everyPageSize, List<TeamPO> teamPOList) {
         if (teamPOList.isEmpty()){
             return new ArrayList<>();
         }
@@ -643,21 +699,6 @@ public class UserServiceImpl /*mp用法 extends ServiceImpl<UserMapper, User>*/ 
             safetyTeamVOList.add(this.getSafetyTeam(teamPOList.get((int) i)));
         }
         return safetyTeamVOList;
-    }
-
-    /**
-     * 计算数据库中前端当前用户担任队长的队伍, n条数据一页共可以显示m页，返回m
-     * @param httpServletRequest
-     * @param everyPageSize
-     * @return
-     */
-    @Override
-    public Long getMyTeamWithLeaderPageNum(HttpServletRequest httpServletRequest, Integer everyPageSize) {
-        Long loginUserId = this.getLoginUserId(httpServletRequest);
-        List<TeamPO> myTeamWithLeaderOnePage = userMapper.getMyTeamWithLeaderOnePage(loginUserId);
-        long allMyTeamWithLeaderNum = myTeamWithLeaderOnePage.size();
-        return (allMyTeamWithLeaderNum - 1)/everyPageSize
-                + ((allMyTeamWithLeaderNum - 1) % everyPageSize == 0 ? 0:1);
     }
 
     /**

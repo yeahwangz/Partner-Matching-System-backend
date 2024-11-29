@@ -212,4 +212,11 @@ public interface UserMapper /*mp用法 extends BaseMapper<User>*/ {
      * @return
      */
     Long getAllTeamNumWithoutLoginUser(Long loginUserId);
+
+    /**
+     * 获取当前用户是普通成员的队伍
+     * @param loginUserId
+     * @return
+     */
+    List<TeamPO> getMyTeamWithMemberOnePage(Long loginUserId);
 }
